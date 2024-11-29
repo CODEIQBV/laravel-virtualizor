@@ -1899,35 +1899,34 @@ class VpsManager
             $params = [
                 'changeserid' => $serverId
             ];
-
+    
             // If VPS import data is provided, add import parameters
             if (!empty($vpsImportData)) {
                 $params['importvps'] = 1;
-
+    
                 // Add bandwidth and user ID parameters for each VPS
                 foreach ($vpsImportData as $vpsName => $data) {
                     $params["vsbw_{$vpsName}"] = $data['bandwidth'];
                     $params["vsuser_{$vpsName}"] = $data['user_id'];
                 }
             }
-            }
-
+    
             $response = $this->api->importOpenvz($params);
-
+    
             if ($raw) {
                 return $response;
             }
-
+    
             if (!empty($vpsImportData) && empty($response['done'])) {
                 throw new VirtualizorApiException(
                     'Failed to import OpenVZ VPS(s): Operation unsuccessful'
                 );
             }
-
+    
             return [
                 'success' => !empty($response['done']),
                 'orphaned_vps' => $response['orphan'] ?? [],
-                'users' => array_map(function($user) {
+                'users' => array_map(function ($user) {
                     return [
                         'id' => (int) $user['uid'],
                         'email' => $user['email'],
@@ -2195,6 +2194,104 @@ class VpsManager
         } catch (VirtualizorApiException $e) {
             throw new VirtualizorApiException(
                 "Failed to list SSH keys for user {$userId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Add SSH keys to a VPS
+     *
+     * @param int $vpsId VPS ID to add SSH keys to
+     * @param array<int> $sshKeyIds Array of SSH key IDs to add
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true/false when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function addSshKeys(int $vpsId, array $sshKeyIds, bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->addSshKeys($vpsId, $sshKeyIds);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to add SSH keys: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to add SSH keys to VPS {$vpsId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Lock a VPS
+     *
+     * @param int $vpsId VPS ID to lock
+     * @param string $reason Reason for locking (optional)
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function lock(int $vpsId, string $reason = '', bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->lockVps($vpsId, $reason);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to lock VPS: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to lock VPS {$vpsId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Unlock a VPS
+     *
+     * @param int $vpsId VPS ID to unlock
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function unlock(int $vpsId, bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->unlockVps($vpsId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to unlock VPS: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to unlock VPS {$vpsId}: " . $e->getMessage(),
                 $e->getContext()
             );
         }

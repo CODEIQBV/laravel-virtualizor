@@ -1147,7 +1147,7 @@ class AdminApi extends BaseApi
     }
 
     /**
-     * List SSH keys
+     * List SSH keys for a user
      *
      * @param int $userId User ID to list SSH keys for
      * @return array
@@ -1158,6 +1158,45 @@ class AdminApi extends BaseApi
             'list_ssh_keys' => 1,
             'uid' => $userId
         ]);
+    }
+
+    /**
+     * Add SSH keys to a VPS
+     *
+     * @param int $vpsId VPS ID to add SSH keys to
+     * @param array<int> $sshKeyIds Array of SSH key IDs to add
+     * @return array
+     */
+    public function addSshKeys(int $vpsId, array $sshKeyIds): array
+    {
+        return $this->makeRequest("index.php?act=managevps&vpsid={$vpsId}&add_ssh_keys=1", [
+            'sshkeys' => $sshKeyIds
+        ], 'POST');
+    }
+
+    /**
+     * Lock a VPS
+     *
+     * @param int $vpsId VPS ID to lock
+     * @param string $reason Reason for locking (optional)
+     * @return array
+     */
+    public function lockVps(int $vpsId, string $reason = ''): array
+    {
+        return $this->makeRequest("index.php?act=vs&action=lock&vpsid={$vpsId}", [
+            'reason' => $reason
+        ], 'POST');
+    }
+
+    /**
+     * Unlock a VPS
+     *
+     * @param int $vpsId VPS ID to unlock
+     * @return array
+     */
+    public function unlockVps(int $vpsId): array
+    {
+        return $this->makeRequest("index.php?act=vs&action=unlock&vpsid={$vpsId}");
     }
 
     // Add other admin API methods here
