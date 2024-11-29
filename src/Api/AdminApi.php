@@ -1762,4 +1762,76 @@ class AdminApi extends BaseApi
             'delete' => $delete
         ], 'POST');
     }
+
+    /**
+     * List login logs
+     *
+     * @param array{
+     *    username?: string,
+     *    ip?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listLoginLogs(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=loginlogs', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * List user activity logs
+     *
+     * @param array{
+     *    vpsid?: int,
+     *    email?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listUserLogs(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=userlogs', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * List IP logs
+     *
+     * @param array{
+     *    ip?: string,
+     *    vpsid?: int
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listIpLogs(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=iplogs', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Delete IP logs
+     *
+     * @return array API response
+     */
+    public function deleteIpLogs(): array
+    {
+        return $this->makeRequest('index.php?act=iplogs', [
+            'delete' => 1
+        ], 'POST');
+    }
 }

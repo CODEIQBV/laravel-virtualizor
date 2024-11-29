@@ -13,6 +13,7 @@ use CODEIQ\Virtualizor\Services\Admin\VpsManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerManager;
 use CODEIQ\Virtualizor\Services\Admin\PlanManager;
 use CODEIQ\Virtualizor\Services\Admin\DnsManager;
+use CODEIQ\Virtualizor\Services\Admin\LogManager;
 
 /**
  * @method static UserService users()
@@ -25,6 +26,7 @@ use CODEIQ\Virtualizor\Services\Admin\DnsManager;
  * @method static ServerGroupManager serverGroups()
  * @method static PlanManager plans()
  * @method static DnsManager dns()
+ * @method static LogManager logs()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */

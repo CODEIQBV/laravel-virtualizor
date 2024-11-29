@@ -13,6 +13,7 @@ use CODEIQ\Virtualizor\Services\Admin\VpsManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerManager;
 use CODEIQ\Virtualizor\Services\Admin\PlanManager;
 use CODEIQ\Virtualizor\Services\Admin\DnsManager;
+use CODEIQ\Virtualizor\Services\Admin\LogManager;
 
 class VirtualizorAdmin
 {
@@ -81,5 +82,10 @@ class VirtualizorAdmin
     public static function dns(): DnsManager
     {
         return new DnsManager(self::getApi());
+    }
+
+    public static function logs(): LogManager
+    {
+        return new LogManager(self::getApi());
     }
 }
