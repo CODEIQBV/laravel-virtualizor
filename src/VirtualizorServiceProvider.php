@@ -2,22 +2,35 @@
 
 namespace CODEIQ\Virtualizor;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Illuminate\Support\ServiceProvider;
+use CODEIQ\Virtualizor\Services\AdminServices;
+use CODEIQ\Virtualizor\Api\AdminApi;
 
-class VirtualizorServiceProvider extends PackageServiceProvider
+class VirtualizorServiceProvider extends ServiceProvider
 {
-    public function configurePackage(Package $package): void
+    public function register()
     {
-        $package
-            ->name('laravel-virtualizor')
-            ->hasConfigFile();
+        // Bind the admin API
+        $this->app->singleton(AdminApi::class, function ($app) {
+            $config = $app['config']['virtualizor'];
+            return new AdminApi(
+                $config['admin']['key'],
+                $config['admin']['pass'],
+                $config['admin']['ip'],
+                $config['admin']['port']
+            );
+        });
+
+        // Bind the admin services
+        $this->app->singleton('virtualizor.admin', function ($app) {
+            return new AdminServices($app->make(AdminApi::class));
+        });
     }
 
-    public function packageRegistered(): void
+    public function boot()
     {
-        $this->app->singleton(Virtualizor::class, function ($app) {
-            return new Virtualizor($app['config']['virtualizor']);
-        });
+        $this->publishes([
+            __DIR__.'/../config/virtualizor.php' => config_path('virtualizor.php'),
+        ], 'virtualizor-config');
     }
 }

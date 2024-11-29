@@ -7,32 +7,38 @@ use CODEIQ\Virtualizor\Services\Admin\AclManager;
 use CODEIQ\Virtualizor\Services\Admin\BackupManager;
 use CODEIQ\Virtualizor\Services\Admin\IpPoolManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerGroupManager;
-use CODEIQ\Virtualizor\Services\Admin\ServerManager;
-use CODEIQ\Virtualizor\Services\Admin\UserManager;
+use CODEIQ\Virtualizor\Services\Admin\StorageManager;
+use CODEIQ\Virtualizor\Services\Admin\UserService;
 use CODEIQ\Virtualizor\Services\Admin\VpsManager;
+use CODEIQ\Virtualizor\Services\Admin\ServerManager;
 
 class VirtualizorAdmin
 {
-    private static ?AdminApi $api = null;
+    protected static ?AdminApi $api = null;
 
-    private static function getApi(): AdminApi
+    protected static function getApi(): AdminApi
     {
         if (! self::$api) {
-            $config = config('virtualizor.admin');
+            $config = config('virtualizor');
             self::$api = new AdminApi(
-                $config['key'],
-                $config['pass'],
-                $config['ip'],
-                $config['port']
+                $config['admin']['key'],
+                $config['admin']['pass'],
+                $config['admin']['ip'],
+                $config['admin']['port']
             );
         }
 
         return self::$api;
     }
 
-    public static function users(): UserManager
+    public static function users(): UserService
     {
-        return new UserManager(self::getApi());
+        return new UserService(self::getApi());
+    }
+
+    public static function storage(): StorageManager
+    {
+        return new StorageManager(self::getApi());
     }
 
     public static function vps(): VpsManager
@@ -40,19 +46,14 @@ class VirtualizorAdmin
         return new VpsManager(self::getApi());
     }
 
-    public static function acl(): AclManager
-    {
-        return new AclManager(self::getApi());
-    }
-
     public static function servers(): ServerManager
     {
         return new ServerManager(self::getApi());
     }
 
-    public static function serverGroups(): ServerGroupManager
+    public static function acl(): AclManager
     {
-        return new ServerGroupManager(self::getApi());
+        return new AclManager(self::getApi());
     }
 
     public static function backup(): BackupManager
@@ -60,8 +61,13 @@ class VirtualizorAdmin
         return new BackupManager(self::getApi());
     }
 
-    public static function ipPool(): IpPoolManager
+    public static function ippool(): IpPoolManager
     {
         return new IpPoolManager(self::getApi());
+    }
+
+    public static function serverGroups(): ServerGroupManager
+    {
+        return new ServerGroupManager(self::getApi());
     }
 }

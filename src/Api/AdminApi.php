@@ -1199,5 +1199,183 @@ class AdminApi extends BaseApi
         return $this->makeRequest("index.php?act=vs&action=unlock&vpsid={$vpsId}");
     }
 
+    /**
+     * List storage information
+     *
+     * @param array{
+     *    name?: string,
+     *    path?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array
+     */
+    public function listStorage(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=storage', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Edit storage configuration
+     *
+     * @param int $storageId Storage ID to edit
+     * @param array{
+     *    name: string,
+     *    oversell?: int,
+     *    alert_threshold?: int,
+     *    primary_storage?: int
+     * } $params Storage parameters
+     * @return array
+     */
+    public function editStorage(int $storageId, array $params): array
+    {
+        return $this->makeRequest("index.php?act=editstorage&stid={$storageId}", $params, 'POST');
+    }
+
+    /**
+     * Delete storage(s)
+     *
+     * @param int|string|array $storageIds Single storage ID, comma-separated IDs, or array of IDs
+     * @return array API response
+     */
+    public function deleteStorage($storageIds): array
+    {
+        $delete = is_array($storageIds) ? implode(',', $storageIds) : $storageIds;
+        
+        return $this->makeRequest('index.php?act=storage', [
+            'delete' => $delete
+        ], 'POST');
+    }
+
+    /**
+     * Add new storage
+     *
+     * @param array{
+     *    name: string,
+     *    path: string,
+     *    type: string,
+     *    serid: int|array,
+     *    format: string,
+     *    primary_storage?: int,
+     *    oversell?: int,
+     *    alert_threshold?: int,
+     *    lightbit_project?: string
+     * } $params Storage parameters
+     * @return array
+     */
+    public function addStorage(array $params): array
+    {
+        return $this->makeRequest('index.php?act=addstorage', $params, 'POST');
+    }
+
+    /**
+     * List orphaned disks
+     *
+     * @param array{
+     *    st_id?: int,
+     *    st_type?: string,
+     *    disk_path?: string
+     * } $filters Search filters
+     * @return array
+     */
+    public function listOrphanedDisks(array $filters = []): array
+    {
+        return $this->makeRequest('index.php?act=orphaneddisks', $filters);
+    }
+
+    /**
+     * Manage orphaned disks
+     *
+     * @param array{delete?: string} $post Post parameters
+     * @return array API response
+     * @throws VirtualizorApiException
+     */
+    public function orphaneddisks(array $post = []): array
+    {
+        $path = 'index.php?act=orphaneddisks';
+        return $this->call($path, [], $post);
+    }
+
+    /**
+     * List volumes
+     *
+     * @param array{
+     *    name?: string,
+     *    path?: string,
+     *    user_email?: string,
+     *    search?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listVolumes(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=volumes', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Add a new volume
+     *
+     * @param array{
+     *    disk_name: string,
+     *    vpsid: int,
+     *    newserid: int,
+     *    size: float,
+     *    format_type: string,
+     *    attach?: int,
+     *    mnt_point?: string,
+     *    st_uuid?: string
+     * } $params Volume parameters
+     * @return array API response
+     */
+    public function addVolume(array $params): array
+    {
+        return $this->makeRequest('index.php?act=volumes', [
+            'addvolume' => 1,
+            ...$params
+        ], 'POST');
+    }
+
+    /**
+     * Edit volume
+     *
+     * @param array{
+     *    e_serid: int,
+     *    e_vpsid: int,
+     *    e_todo: int,
+     *    e_disk_size?: float,
+     *    disk_did_action: int
+     * } $params Volume edit parameters
+     * @return array API response
+     */
+    public function editVolume(array $params): array
+    {
+        return $this->makeRequest('index.php?act=volumes', $params, 'POST');
+    }
+
+    /**
+     * Delete volume(s)
+     *
+     * @param int|string|array $volumeIds Single volume ID, comma-separated IDs, or array of IDs
+     * @return array API response
+     */
+    public function deleteVolumes($volumeIds): array
+    {
+        $delete = is_array($volumeIds) ? implode(',', $volumeIds) : $volumeIds;
+        
+        return $this->makeRequest('index.php?act=volumes', [
+            'delete' => $delete
+        ], 'POST');
+    }
+
     // Add other admin API methods here
 }
