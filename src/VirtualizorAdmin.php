@@ -18,6 +18,7 @@ use CODEIQ\Virtualizor\Services\Admin\ServiceManager;
 use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
 use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
 use CODEIQ\Virtualizor\Services\Admin\DiskManager;
+use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
 
 class VirtualizorAdmin
 {
@@ -111,5 +112,10 @@ class VirtualizorAdmin
     public static function disk(): DiskManager
     {
         return new DiskManager(self::getApi());
+    }
+
+    public static function bandwidth(): BandwidthManager
+    {
+        return new BandwidthManager(self::getApi());
     }
 }

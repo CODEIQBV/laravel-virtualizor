@@ -1936,4 +1936,17 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=manageserver', $params);
     }
+
+    /**
+     * Get bandwidth usage
+     *
+     * @param string $month Month in YYYYMM format
+     * @return array API response
+     */
+    public function getBandwidth(string $month): array
+    {
+        return $this->makeRequest('index.php?act=bandwidth', [
+            'show' => $month
+        ]);
+    }
 }

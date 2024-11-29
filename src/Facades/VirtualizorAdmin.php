@@ -18,6 +18,7 @@ use CODEIQ\Virtualizor\Services\Admin\ServiceManager;
 use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
 use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
 use CODEIQ\Virtualizor\Services\Admin\DiskManager;
+use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
 
 /**
  * @method static UserService users()
@@ -35,6 +36,7 @@ use CODEIQ\Virtualizor\Services\Admin\DiskManager;
  * @method static VpsStatisticsManager vpsStats()
  * @method static ProcessManager processes()
  * @method static DiskManager disk()
+ * @method static BandwidthManager bandwidth()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */

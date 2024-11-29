@@ -18,6 +18,7 @@ use CODEIQ\Virtualizor\Services\Admin\ServiceManager;
 use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
 use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
 use CODEIQ\Virtualizor\Services\Admin\DiskManager;
+use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
 
 /**
  * @method UserService users()
@@ -35,6 +36,7 @@ use CODEIQ\Virtualizor\Services\Admin\DiskManager;
  * @method VpsStatisticsManager vpsStats()
  * @method ProcessManager processes()
  * @method DiskManager disk()
+ * @method BandwidthManager bandwidth()
  */
 class AdminServices
 {
@@ -55,6 +57,7 @@ class AdminServices
     protected ?VpsStatisticsManager $vpsStatsManager = null;
     protected ?ProcessManager $processManager = null;
     protected ?DiskManager $diskManager = null;
+    protected ?BandwidthManager $bandwidthManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -180,5 +183,13 @@ class AdminServices
             $this->diskManager = new DiskManager($this->api);
         }
         return $this->diskManager;
+    }
+
+    public function bandwidth(): BandwidthManager
+    {
+        if (! $this->bandwidthManager) {
+            $this->bandwidthManager = new BandwidthManager($this->api);
+        }
+        return $this->bandwidthManager;
     }
 }

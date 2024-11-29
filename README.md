@@ -3239,3 +3239,106 @@ Disk Info Response:
     ]
 ]
 ```
+
+#### Bandwidth Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get bandwidth usage for specific month
+$usage = VirtualizorAdmin::bandwidth()->usage('202401');
+
+// Get raw API response
+$response = VirtualizorAdmin::bandwidth()->usage('202401', raw: true);
+```
+
+Bandwidth Usage Response:
+```php
+[
+    'bandwidth' => [
+        'total' => [
+            'limit' => [
+                'mb' => 102400.0,
+                'gb' => 100.0
+            ],
+            'used' => [
+                'mb' => 46647.12,
+                'gb' => 45.55
+            ],
+            'free' => [
+                'mb' => 55752.88,
+                'gb' => 54.45
+            ],
+            'percent' => [
+                'used' => 45.55,
+                'free' => 54.45
+            ]
+        ],
+        'daily_usage' => [
+            '1' => 205.78,
+            '2' => 2160.2,
+            // ... daily usage for each day
+        ],
+        'incoming' => [
+            'usage' => [
+                '1' => 79.1,
+                '2' => 378.38,
+                // ... daily incoming usage
+            ],
+            'total' => [
+                'limit' => [
+                    'mb' => 16732.83,
+                    'gb' => 16.34
+                ],
+                'used' => [
+                    'mb' => 16731.83,
+                    'gb' => 16.34
+                ],
+                'free' => [
+                    'mb' => 1.0,
+                    'gb' => 0.001
+                ],
+                'percent' => [
+                    'used' => 99.99,
+                    'free' => 0.01
+                ]
+            ]
+        ],
+        'outgoing' => [
+            'usage' => [
+                '1' => 126.68,
+                '2' => 1781.82,
+                // ... daily outgoing usage
+            ],
+            'total' => [
+                'limit' => [
+                    'mb' => 29916.29,
+                    'gb' => 29.22
+                ],
+                'used' => [
+                    'mb' => 29915.29,
+                    'gb' => 29.21
+                ],
+                'free' => [
+                    'mb' => 1.0,
+                    'gb' => 0.001
+                ],
+                'percent' => [
+                    'used' => 99.99,
+                    'free' => 0.01
+                ]
+            ]
+        ]
+    ],
+    'month' => [
+        'yr' => '2016',
+        'month' => '11',
+        'mth_txt' => 'Nov',
+        'days' => '30',
+        'prev' => '201610',
+        'next' => '201612'
+    ],
+    'timestamp' => 1471411017,
+    'time_taken' => '0.104'
+]
+```
