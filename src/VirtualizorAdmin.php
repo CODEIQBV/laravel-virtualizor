@@ -17,6 +17,7 @@ use CODEIQ\Virtualizor\Services\Admin\LogManager;
 use CODEIQ\Virtualizor\Services\Admin\ServiceManager;
 use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
 use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
+use CODEIQ\Virtualizor\Services\Admin\DiskManager;
 
 class VirtualizorAdmin
 {
@@ -105,5 +106,10 @@ class VirtualizorAdmin
     public static function processes(): ProcessManager
     {
         return new ProcessManager(self::getApi());
+    }
+
+    public static function disk(): DiskManager
+    {
+        return new DiskManager(self::getApi());
     }
 }

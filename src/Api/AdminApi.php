@@ -1923,4 +1923,17 @@ class AdminApi extends BaseApi
             ...$params
         ], 'POST');
     }
+
+    /**
+     * Get disk information
+     *
+     * @param array{
+     *    changeserid?: int
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function getDiskInfo(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=manageserver', $params);
+    }
 }

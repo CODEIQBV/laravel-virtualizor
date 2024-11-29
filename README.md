@@ -3169,3 +3169,73 @@ $result = VirtualizorAdmin::processes()->kill(
 
 // Get raw API response
 $response = VirtualizorAdmin::processes()->kill([44, 54, 1239], raw: true);
+```
+
+#### Disk Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get disk info from master server
+$diskInfo = VirtualizorAdmin::disk()->info();
+
+// Get disk info from specific server
+$diskInfo = VirtualizorAdmin::disk()->info(1);
+
+// Get raw API response
+$response = VirtualizorAdmin::disk()->info(raw: true);
+```
+
+Disk Info Response:
+```php
+[
+    '/' => [
+        'size' => [
+            'total' => [
+                'mb' => 9714.86,
+                'gb' => 9.49
+            ],
+            'used' => [
+                'mb' => 3473.91,
+                'gb' => 3.39,
+                'actual_gb' => 3.88
+            ],
+            'available' => [
+                'mb' => 5740.94,
+                'gb' => 6.09
+            ],
+            'free' => [
+                'mb' => 6240.94
+            ]
+        ],
+        'usage' => [
+            'percent' => 35.76,
+            'percent_free' => 64.24
+        ]
+    ],
+    '/boot' => [
+        'size' => [
+            'total' => [
+                'mb' => 239.92,
+                'gb' => 0.23
+            ],
+            'used' => [
+                'mb' => 48.34,
+                'gb' => 0.05,
+                'actual_gb' => 0.06
+            ],
+            'available' => [
+                'mb' => 178.78,
+                'gb' => 0.19
+            ],
+            'free' => [
+                'mb' => 191.58
+            ]
+        ],
+        'usage' => [
+            'percent' => 20.15,
+            'percent_free' => 79.85
+        ]
+    ]
+]
+```
