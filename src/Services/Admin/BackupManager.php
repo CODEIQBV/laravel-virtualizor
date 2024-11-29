@@ -622,4 +622,479 @@ class BackupManager
             );
         }
     }
+
+    /**
+     * Configure database backups
+     *
+     * @param array{
+     *    enabled: bool,
+     *    type: string,
+     *    cron: string,
+     *    email?: string,
+     *    server_id?: int,
+     *    server_dir?: string
+     * } $params Backup configuration parameters
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function configureDatabaseBackups(array $params, bool $raw = false): array|bool
+    {
+        try {
+            // Validate required fields
+            if (!isset($params['enabled'])) {
+                throw new VirtualizorApiException('enabled parameter is required');
+            }
+
+            if (!isset($params['type'])) {
+                throw new VirtualizorApiException('type parameter is required');
+            }
+
+            if (!isset($params['cron'])) {
+                throw new VirtualizorApiException('cron parameter is required');
+            }
+
+            // Validate backup type
+            if (!in_array($params['type'], self::BACKUP_TYPES)) {
+                throw new VirtualizorApiException(
+                    'Invalid backup type. Available types: ' . implode(', ', self::BACKUP_TYPES)
+                );
+            }
+
+            // Validate type-specific requirements
+            if ($params['type'] === 'EMAIL' && empty($params['email'])) {
+                throw new VirtualizorApiException('email is required for EMAIL backup type');
+            }
+
+            if (in_array($params['type'], ['SSH', 'FTP'])) {
+                if (empty($params['server_id'])) {
+                    throw new VirtualizorApiException('server_id is required for SSH/FTP backup type');
+                }
+                if (empty($params['server_dir'])) {
+                    throw new VirtualizorApiException('server_dir is required for SSH/FTP backup type');
+                }
+            }
+
+            // Validate cron format
+            if (!preg_match('/^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$/', $params['cron'])) {
+                throw new VirtualizorApiException('Invalid cron format. Must be in standard cron format (e.g. "0 0 * * *")');
+            }
+
+            $requestParams = [
+                'databasebackups' => $params['enabled'] ? 1 : 0,
+                'type' => $params['type'],
+                'dbbackup_cron' => $params['cron']
+            ];
+
+            if ($params['type'] === 'EMAIL') {
+                $requestParams['email'] = $params['email'];
+            } else {
+                $requestParams['dbbackup_server'] = $params['server_id'];
+                $requestParams['dbbackup_server_dir'] = $params['server_dir'];
+            }
+
+            $response = $this->api->configureDatabaseBackups($requestParams);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done']['cron_set'])) {
+                throw new VirtualizorApiException(
+                    'Failed to configure database backups: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to configure database backups: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Disable database backups
+     *
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function disableDatabaseBackups(bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->disableDatabaseBackups();
+
+            if ($raw) {
+                return $response;
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to disable database backups: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * List database backups
+     *
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted backup info when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function listDatabaseBackups(bool $raw = false): array
+    {
+        try {
+            $response = $this->api->listDatabaseBackups();
+
+            if ($raw) {
+                return $response;
+            }
+
+            $backups = [];
+            foreach ($response['filename'] ?? [] as $id => $filename) {
+                $backups[] = [
+                    'id' => (int) $id,
+                    'filename' => $filename,
+                    'timestamp' => $this->parseBackupTimestamp($filename)
+                ];
+            }
+
+            return [
+                'backups' => $backups,
+                'timestamp' => $response['timenow'] ?? null,
+                'time_taken' => $response['time_taken'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to list database backups: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Parse backup timestamp from filename
+     * Format: virtualizor-YYYY-MM-DD_HH.MM.SS.sql.gz
+     *
+     * @param string $filename Backup filename
+     * @return int|null Unix timestamp or null if invalid format
+     */
+    private function parseBackupTimestamp(string $filename): ?int
+    {
+        if (preg_match('/virtualizor-(\d{4})-(\d{2})-(\d{2})_(\d{2})\.(\d{2})\.(\d{2})/', $filename, $matches)) {
+            return mktime(
+                (int) $matches[4], // hour
+                (int) $matches[5], // minute
+                (int) $matches[6], // second
+                (int) $matches[2], // month
+                (int) $matches[3], // day
+                (int) $matches[1]  // year
+            );
+        }
+        return null;
+    }
+
+    /**
+     * Delete database backup(s)
+     *
+     * @param string|array $backupIds Single backup ID or array of backup IDs
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function deleteDatabaseBackup(string|array $backupIds, bool $raw = false): array|bool
+    {
+        try {
+            // Convert array to comma-separated string if needed
+            $ids = is_array($backupIds) ? implode(',', $backupIds) : $backupIds;
+
+            $response = $this->api->deleteDatabaseBackup($ids);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done']['delete'])) {
+                throw new VirtualizorApiException(
+                    'Failed to delete database backup: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            $ids = is_array($backupIds) ? implode(', ', $backupIds) : $backupIds;
+            throw new VirtualizorApiException(
+                "Failed to delete database backup(s) {$ids}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Create database backup
+     *
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function createDatabaseBackup(bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->createDatabaseBackup();
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done']['succ'])) {
+                throw new VirtualizorApiException(
+                    'Failed to create database backup: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to create database backup: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Create VPS backup
+     *
+     * @param int $planId Backup plan ID
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function createVpsBackup(int $planId, bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->createVpsBackup($planId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to create VPS backup: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to create VPS backup for plan {$planId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Get VPS backup details
+     *
+     * @param int $vpsId VPS ID to get backup details for
+     * @param string|null $date Specific date to get backups for (format: YYYYMMDD)
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted backup info when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function getVpsBackupDetails(int $vpsId, ?string $date = null, bool $raw = false): array
+    {
+        try {
+            $params = ['vpsid' => $vpsId];
+            if ($date !== null) {
+                // Validate date format
+                if (!preg_match('/^\d{8}$/', $date)) {
+                    throw new VirtualizorApiException('Date must be in YYYYMMDD format (e.g. 20240101)');
+                }
+                $params['date'] = $date;
+            }
+
+            $response = $this->api->getVpsBackupDetails($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            $backups = [];
+            foreach ($response['backup_list'] ?? [] as $backupDate => $files) {
+                $backups[$backupDate] = array_map(function($file) {
+                    return [
+                        'path' => $file['abs_path'],
+                        'size' => [
+                            'bytes' => (int) $file['size'],
+                            'mb' => round((int) $file['size'] / 1024 / 1024, 2),
+                            'gb' => round((int) $file['size'] / 1024 / 1024 / 1024, 2)
+                        ]
+                    ];
+                }, $files);
+            }
+
+            return [
+                'backups' => $backups,
+                'directories' => $response['directories'] ?? [],
+                'server' => [
+                    'id' => (int) ($response['vps_backup_server'] ?? 0),
+                    'directory' => $response['vps_backup_dir'] ?? null
+                ],
+                'timestamp' => $response['timenow'] ?? null,
+                'time_taken' => $response['time_taken'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to get backup details for VPS {$vpsId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Restore VPS backup
+     *
+     * @param array{
+     *    vpsid: int,
+     *    dir: string,
+     *    date: string,
+     *    file: string,
+     *    bid?: int,
+     *    newvps?: bool,
+     *    newserid?: int
+     * } $params Restore parameters
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function restoreVpsBackup(array $params, bool $raw = false): array|bool
+    {
+        try {
+            // Validate required fields
+            $required = ['vpsid', 'dir', 'date', 'file'];
+            foreach ($required as $field) {
+                if (!isset($params[$field])) {
+                    throw new VirtualizorApiException("{$field} is required");
+                }
+            }
+
+            // Validate date format (YYYYMMDD)
+            if (!preg_match('/^\d{8}$/', $params['date'])) {
+                throw new VirtualizorApiException('date must be in YYYYMMDD format (e.g. 20240101)');
+            }
+
+            // Convert boolean to integer
+            if (isset($params['newvps'])) {
+                $params['newvps'] = $params['newvps'] ? 1 : 0;
+            }
+
+            $response = $this->api->restoreVpsBackup($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['restore_done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to restore VPS backup: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to restore backup for VPS {$params['vpsid']}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Delete VPS backup
+     *
+     * @param array{
+     *    file: string,
+     *    dir: string,
+     *    date: string,
+     *    bid?: int
+     * } $params Delete parameters
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function deleteVpsBackup(array $params, bool $raw = false): array|bool
+    {
+        try {
+            // Validate required fields
+            $required = ['file', 'dir', 'date'];
+            foreach ($required as $field) {
+                if (!isset($params[$field])) {
+                    throw new VirtualizorApiException("{$field} is required");
+                }
+            }
+
+            // Validate date format (YYYYMMDD)
+            if (!preg_match('/^\d{8}$/', $params['date'])) {
+                throw new VirtualizorApiException('date must be in YYYYMMDD format (e.g. 20240101)');
+            }
+
+            $response = $this->api->deleteVpsBackup($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['delete_done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to delete VPS backup: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to delete VPS backup: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Create single VPS backup
+     *
+     * @param int $vpsId VPS ID to backup
+     * @param bool $raw Return raw API response
+     * @return array|int Returns task ID when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function createSingleVpsBackup(int $vpsId, bool $raw = false): array|int
+    {
+        try {
+            $response = $this->api->createSingleVpsBackup($vpsId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done']['msg']) || 
+                !str_contains($response['done']['msg'], 'backup was started successfully')) {
+                throw new VirtualizorApiException(
+                    'Failed to create VPS backup: Operation unsuccessful'
+                );
+            }
+
+            return (int) $response['actid'];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to create backup for VPS {$vpsId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
 }

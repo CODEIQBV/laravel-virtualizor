@@ -2293,4 +2293,148 @@ class AdminApi extends BaseApi
             'opt' => 'show_logs'
         ], 'POST');
     }
+
+    /**
+     * Configure database backups
+     *
+     * @param array{
+     *    databasebackups: int,
+     *    type?: string,
+     *    dbbackup_cron?: string,
+     *    email?: string,
+     *    dbbackup_server?: int,
+     *    dbbackup_server_dir?: string
+     * } $params Backup configuration parameters
+     * @return array API response
+     */
+    public function configureDatabaseBackups(array $params): array
+    {
+        return $this->makeRequest('index.php?act=databackups', $params, 'POST');
+    }
+
+    /**
+     * Disable database backups
+     *
+     * @return array API response
+     */
+    public function disableDatabaseBackups(): array
+    {
+        return $this->makeRequest('index.php?act=databackup', [
+            'databasebackups_delete' => 1
+        ], 'POST');
+    }
+
+    /**
+     * List database backups
+     *
+     * @return array API response
+     */
+    public function listDatabaseBackups(): array
+    {
+        return $this->makeRequest('index.php?act=databackup');
+    }
+
+    /**
+     * Delete database backup(s)
+     *
+     * @param string $backupIds Comma-separated backup IDs
+     * @return array API response
+     */
+    public function deleteDatabaseBackup(string $backupIds): array
+    {
+        return $this->makeRequest('index.php?act=databackup', [
+            'id' => $backupIds
+        ], 'POST');
+    }
+
+    /**
+     * Create database backup
+     *
+     * @return array API response
+     */
+    public function createDatabaseBackup(): array
+    {
+        return $this->makeRequest('index.php?act=databackup', [
+            'dbdown' => 1
+        ], 'POST');
+    }
+
+    /**
+     * Create VPS backup
+     *
+     * @param int $planId Backup plan ID
+     * @return array API response
+     */
+    public function createVpsBackup(int $planId): array
+    {
+        return $this->makeRequest('index.php?act=editbackup_plan', [
+            'backup_now' => 1,
+            'bpid' => $planId
+        ], 'POST');
+    }
+
+    /**
+     * Get VPS backup details
+     *
+     * @param array{
+     *    vpsid: int,
+     *    date?: string
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function getVpsBackupDetails(array $params): array
+    {
+        return $this->makeRequest('index.php?act=vpsrestore&op=get_vps', $params);
+    }
+
+    /**
+     * Restore VPS backup
+     *
+     * @param array{
+     *    vpsid: int,
+     *    dir: string,
+     *    date: string,
+     *    file: string,
+     *    bid?: int,
+     *    newvps?: int,
+     *    newserid?: int
+     * } $params Restore parameters
+     * @return array API response
+     */
+    public function restoreVpsBackup(array $params): array
+    {
+        return $this->makeRequest('index.php?act=vpsrestore', $params, 'POST');
+    }
+
+    /**
+     * Delete VPS backup
+     *
+     * @param array{
+     *    file: string,
+     *    dir: string,
+     *    date: string,
+     *    bid?: int
+     * } $params Delete parameters
+     * @return array API response
+     */
+    public function deleteVpsBackup(array $params): array
+    {
+        return $this->makeRequest('index.php?act=vpsrestore', [
+            'delete' => $params['file'],
+            'dir' => $params['dir'],
+            'date' => $params['date'],
+            'bid' => $params['bid'] ?? null
+        ], 'POST');
+    }
+
+    /**
+     * Create single VPS backup
+     *
+     * @param int $vpsId VPS ID to backup
+     * @return array API response
+     */
+    public function createSingleVpsBackup(int $vpsId): array
+    {
+        return $this->makeRequest("index.php?act=managevps&cbackup=1&vpsid={$vpsId}");
+    }
 }

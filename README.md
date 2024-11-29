@@ -3901,3 +3901,306 @@ Let's Encrypt Logs Response:
     'timestamp' => 1480504710,
     'time_taken' => '0.560'
 ]
+```
+
+// Configure database backups
+$success = VirtualizorAdmin::backup()->configureDatabaseBackups([
+    'enabled' => true,                // Enable/disable backups
+    'type' => 'EMAIL',               // EMAIL, SSH, or FTP
+    'cron' => '0 0 * * *',          // Cron schedule
+    'email' => 'admin@example.com'   // Required for EMAIL type
+]);
+
+// Configure SSH/FTP backups
+$success = VirtualizorAdmin::backup()->configureDatabaseBackups([
+    'enabled' => true,
+    'type' => 'SSH',                 // or 'FTP'
+    'cron' => '0 0 * * *',
+    'server_id' => 1,                // Backup server ID
+    'server_dir' => '/backups'       // Backup directory
+]);
+
+// Disable database backups
+$success = VirtualizorAdmin::backup()->disableDatabaseBackups();
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->configureDatabaseBackups($params, raw: true);
+```
+
+Database Backup Configuration Response:
+```php
+[
+    'title' => 'Database Backup',
+    'done' => [
+        'cron_set' => 1
+    ],
+    'backup_servers' => [
+        '1' => [
+            'bid' => '1',
+            'name' => 'slate_doc_server',
+            'type' => 'SSH'
+        ]
+    ],
+    'timestamp' => 1536255440,
+    'time_taken' => '0.214'
+]
+```
+
+Database Backup Disable Response:
+```php
+[
+    'title' => 'Database Backup',
+    'backup_servers' => [
+        '1' => [
+            'bid' => '1',
+            'name' => 'slate_doc_server',
+            'type' => 'SSH'
+        ]
+    ],
+    'timestamp' => 1537286069,
+    'time_taken' => '0.268'
+]
+```
+
+// List database backups
+$backups = VirtualizorAdmin::backup()->listDatabaseBackups();
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->listDatabaseBackups(raw: true);
+```
+
+Database Backup List Response:
+```php
+[
+    'backups' => [
+        [
+            'id' => 2,
+            'filename' => 'virtualizor-2018-09-18_16.33.13.sql.gz',
+            'timestamp' => 1537284793
+        ],
+        [
+            'id' => 3,
+            'filename' => 'virtualizor-2018-09-18_16.33.18.sql.gz',
+            'timestamp' => 1537284798
+        ]
+    ],
+    'timestamp' => 1537284800,
+    'time_taken' => '0.103'
+]
+```
+
+// Delete database backup(s)
+$success = VirtualizorAdmin::backup()->deleteDatabaseBackup('20160529.sql');
+
+// Delete multiple backups
+$success = VirtualizorAdmin::backup()->deleteDatabaseBackup([
+    '20160529.sql',
+    '20160530.sql'
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->deleteDatabaseBackup($backupIds, raw: true);
+```
+
+Database Backup Delete Response:
+```php
+[
+    'title' => 'Database Backup',
+    'done' => [
+        'delete' => true,
+        'db_no_avi' => true
+    ],
+    'backup_servers' => [
+        '1' => [
+            'bid' => '1',
+            'name' => 'slate_doc_server',
+            'type' => 'SSH'
+        ]
+    ],
+    'timestamp' => 1536259307,
+    'time_taken' => '0.201'
+]
+```
+
+// Create database backup
+$success = VirtualizorAdmin::backup()->createDatabaseBackup();
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->createDatabaseBackup(raw: true);
+```
+
+Database Backup Create Response:
+```php
+[
+    'title' => 'Database Backup',
+    'done' => [
+        'succ' => true
+    ],
+    'filename' => [
+        '2' => 'virtualizor-2018-09-18_16.33.18.sql.gz',
+        '3' => 'virtualizor-2018-09-18_17.23.28.sql.gz',
+        '4' => 'virtualizor-2018-09-18_17.29.19.sql.gz',
+        '5' => 'virtualizor-2018-09-18_17.37.15.sql.gz'
+    ],
+    'backup_servers' => [
+        '1' => [
+            'bid' => '1',
+            'name' => 'slate_doc_server',
+            'type' => 'SSH'
+        ]
+    ],
+    'timestamp' => 1537288640,
+    'time_taken' => '0.223'
+]
+```
+
+// Create VPS backup
+$success = VirtualizorAdmin::backup()->createVpsBackup(3);
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->createVpsBackup(3, raw: true);
+```
+
+VPS Backup Create Response:
+```php
+[
+    'title' => 'Edit Backup Plan',
+    'done' => 1,
+    'backup_plan' => [
+        'bpid' => '3',
+        'disabled' => '0',
+        'plan_name' => 'api backup',
+        'bid' => '0',
+        'frequency' => 'hourly',
+        'run_time' => '00:00',
+        'hourly_freq' => '1',
+        'run_day' => '1',
+        'run_date' => '1',
+        'rotation' => '1',
+        'backup_limit' => '0',
+        'restore_limit' => '0',
+        'enable_enduser_backup_servers' => '0',
+        'nice' => '0',
+        'ionice_prio' => '0',
+        'ionice_class' => '3',
+        'disable_compression' => '1',
+        'dir' => '/tmp/api_backup'
+    ],
+    'vpses' => [
+        '79' => [
+            'vpsid' => '79',
+            'vps_name' => 'v1002',
+            'serid' => '0',
+            'hostname' => 'www.mydomainpp.com',
+            'space' => '2'
+        ]
+    ],
+    'timestamp' => 1537290773,
+    'time_taken' => '0.269'
+]
+```
+
+// Get VPS backup details
+$backups = VirtualizorAdmin::backup()->getVpsBackupDetails(79);
+
+// Get backups for specific date
+$backups = VirtualizorAdmin::backup()->getVpsBackupDetails(79, '20240101');
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->getVpsBackupDetails(79, raw: true);
+```
+
+VPS Backup Details Response:
+```php
+[
+    'backups' => [
+        '20180918' => [
+            [
+                'path' => '/tmp/api_backup/20180918/79.img',
+                'size' => [
+                    'bytes' => 2147483648,
+                    'mb' => 2048.0,
+                    'gb' => 2.0
+                ]
+            ]
+        ]
+    ],
+    'directories' => [
+        '/tmp/api_backup'
+    ],
+    'server' => [
+        'id' => 0,
+        'directory' => '/tmp/api_backup'
+    ],
+    'timestamp' => 1537293793,
+    'time_taken' => '0.223'
+]
+```
+
+// Restore VPS backup
+$success = VirtualizorAdmin::backup()->restoreVpsBackup([
+    'vpsid' => 79,                    // VPS ID to restore
+    'dir' => '/tmp/api_backup',       // Backup directory
+    'date' => '20240101',             // Backup date (YYYYMMDD)
+    'file' => 'backup.tar.gz',        // Backup filename
+    'bid' => 1,                       // Optional: Backup server ID
+    'newvps' => true,                 // Optional: Restore to new VPS
+    'newserid' => 2                   // Optional: Server ID for new VPS
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->restoreVpsBackup($params, raw: true);
+```
+
+VPS Backup Restore Response:
+```php
+[
+    'title' => 'Restore VPS Backups',
+    'restore_done' => true,
+    'restore_details' => '',
+    'timestamp' => 1537294345,
+    'time_taken' => '0.244'
+]
+```
+
+// Delete VPS backup
+$success = VirtualizorAdmin::backup()->deleteVpsBackup([
+    'file' => '79.img',              // Backup filename
+    'dir' => '/tmp/api_backup',      // Backup directory
+    'date' => '20240101',            // Backup date (YYYYMMDD)
+    'bid' => 1                       // Optional: Backup server ID
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->deleteVpsBackup($params, raw: true);
+```
+
+VPS Backup Delete Response:
+```php
+[
+    'title' => 'Restore VPS Backups',
+    'delete_done' => true,
+    'timestamp' => 1537296233,
+    'time_taken' => '0.285'
+]
+```
+
+// Create single VPS backup
+$taskId = VirtualizorAdmin::backup()->createSingleVpsBackup(3);
+
+// Get raw API response
+$response = VirtualizorAdmin::backup()->createSingleVpsBackup(3, raw: true);
+```
+
+Single VPS Backup Response:
+```php
+[
+    'title' => 'Manage VPS',
+    'done' => [
+        'msg' => 'The VPS backup was started successfully'
+    ],
+    'actid' => '31794',
+    'timestamp' => 1537290773,
+    'time_taken' => '0.269'
+]
+```
