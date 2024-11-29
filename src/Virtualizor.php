@@ -91,15 +91,4 @@ class Virtualizor implements VirtualizorInterface
             default => throw new VirtualizorApiException("Unknown service: $name")
         };
     }
-
-    /**
-     * Delete a Virtual Server
-     *
-     * @param  int  $vpsId  The ID of the VPS to delete
-     * @return array API response
-     */
-    public function delete_vs(int $vpsId): array
-    {
-        return $this->call('vs', ['delete' => $vpsId]);
-    }
 }

@@ -239,12 +239,12 @@ class VpsManager
      */
     public function create(array $vpsData, bool $raw = false): array
     {
-        // Validate required fields
+        // Validate required fields using array_key_exists instead of isset
         $required = ['virt', 'user_email', 'user_pass', 'hostname', 'rootpass', 'osid', 'ips', 'space', 'ram', 'bandwidth', 'cores'];
-        foreach ($required as $field) {
-            if (! isset($vpsData[$field])) {
-                throw new VirtualizorApiException("$field is required");
-            }
+        $missing = array_filter($required, fn($field) => !array_key_exists($field, $vpsData));
+        
+        if (!empty($missing)) {
+            throw new VirtualizorApiException(implode(', ', $missing) . ' are required');
         }
 
         // Validate virtualization type
@@ -1045,6 +1045,7 @@ class VpsManager
                 'src_port' => $sourcePort,
                 'dest_ip' => $destIp,
                 'dest_port' => $destPort,
+                'action' => 'addvdf'
             ];
 
             $response = $this->api->addDomainForwarding($params);
@@ -1162,6 +1163,161 @@ class VpsManager
             $ids = is_array($recordIds) ? implode(', ', $recordIds) : $recordIds;
             throw new VirtualizorApiException(
                 "Failed to delete domain forwarding record(s) {$ids}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * List domain forwarding records
+     *
+     * @param array{
+     *    record_id?: int,
+     *    server_id?: int,
+     *    vps_id?: int,
+     *    protocol?: string,
+     *    source_hostname?: string,
+     *    source_port?: int|string,
+     *    dest_ip?: string,
+     *    dest_port?: int|string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted records when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function listDomainForwarding(
+        array $filters = [],
+        int $page = 1,
+        int $perPage = 50,
+        bool $raw = false
+    ): array {
+        try {
+            // Map friendly filter names to API parameters
+            $apiFilters = [];
+            if (isset($filters['record_id'])) {
+                $apiFilters['s_id'] = $filters['record_id'];
+            }
+            if (isset($filters['server_id'])) {
+                $apiFilters['s_serid'] = $filters['server_id'];
+            }
+            if (isset($filters['vps_id'])) {
+                $apiFilters['s_vpsid'] = $filters['vps_id'];
+            }
+            if (isset($filters['protocol'])) {
+                $apiFilters['s_protocol'] = strtoupper($filters['protocol']);
+            }
+            if (isset($filters['source_hostname'])) {
+                $apiFilters['s_src_hostname'] = $filters['source_hostname'];
+            }
+            if (isset($filters['source_port'])) {
+                $apiFilters['s_src_port'] = $filters['source_port'];
+            }
+            if (isset($filters['dest_ip'])) {
+                $apiFilters['s_dest_ip'] = $filters['dest_ip'];
+            }
+            if (isset($filters['dest_port'])) {
+                $apiFilters['s_dest_port'] = $filters['dest_port'];
+            }
+
+            $response = $this->api->listDomainForwarding($apiFilters, $page, $perPage);
+
+            if ($raw) {
+                return $response;
+            }
+
+            // Format the records
+            $records = [];
+            foreach ($response as $record) {
+                $records[] = [
+                    'id' => (int) $record['id'],
+                    'vps' => [
+                        'uuid' => $record['vpsuuid'],
+                        'id' => (int) $record['vpsid'],
+                        'name' => $record['vps_name'],
+                        'hostname' => $record['hostname']
+                    ],
+                    'server_id' => (int) $record['serid'],
+                    'protocol' => $record['protocol'],
+                    'source' => [
+                        'hostname' => $record['src_hostname'],
+                        'port' => (int) $record['src_port']
+                    ],
+                    'destination' => [
+                        'ip' => $record['dest_ip'],
+                        'port' => (int) $record['dest_port']
+                    ],
+                    'created_at' => (int) $record['timeadded'],
+                    'updated_at' => (int) $record['timeupdated'],
+                    'skipped' => (bool) $record['skipped']
+                ];
+            }
+
+            return $records;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to list domain forwarding records: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Get High Availability status
+     *
+     * @param int|null $serverGroupId Optional server group ID for specific HA cluster
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted HA status when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function getHaStatus(?int $serverGroupId = null, bool $raw = false): array
+    {
+        try {
+            $response = $this->api->getHaStatus($serverGroupId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['ha_cluster'])) {
+                return [
+                    'success' => true,
+                    'clusters' => [],
+                    'timestamp' => $response['timenow'] ?? null
+                ];
+            }
+
+            $clusters = [];
+            foreach ($response['ha_cluster'] as $groupId => $cluster) {
+                $clusters[] = [
+                    'id' => (int) $groupId,
+                    'name' => $cluster['cluster_name'],
+                    'nodes' => [
+                        'status' => $cluster['node_status'] ?? [],
+                        'count' => [
+                            'total' => count($cluster['node_status'] ?? []),
+                            'online' => count(array_filter($cluster['node_status'] ?? []))
+                        ]
+                    ],
+                    'resources' => array_map(function($resource) {
+                        return [
+                            'name' => $resource['vps_name'],
+                            'status' => $resource['status'],
+                            'node' => $resource['node']
+                        ];
+                    }, $cluster['ha_resources'] ?? [])
+                ];
+            }
+
+            return [
+                'success' => true,
+                'clusters' => $clusters,
+                'timestamp' => $response['timenow'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to get HA status: ' . $e->getMessage(),
                 $e->getContext()
             );
         }

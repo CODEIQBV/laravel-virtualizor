@@ -7,17 +7,17 @@ class AdminApi extends BaseApi
     /**
      * List all users
      *
-     * @param  int  $page  Page number
-     * @param  int  $reslen  Number of records per page
-     * @param  array  $post  Additional filters
+     * @param int $page Page number
+     * @param int $perPage Number of records per page
+     * @param array $post Additional filters
      */
-    public function users(int $page = 1, int $reslen = 50, array $post = []): array
+    public function users(int $page = 1, int $perPage = 50, array $post = []): array
     {
         $path = 'index.php?act=users';
 
         return $this->makeRequest($path, [
             'page' => $page,
-            'reslen' => $reslen,
+            'reslen' => $perPage,
             ...$post,
         ]);
     }
@@ -945,6 +945,49 @@ class AdminApi extends BaseApi
             'action' => 'delvdf',
             'ids' => is_array($recordIds) ? implode(',', $recordIds) : $recordIds
         ], 'POST');
+    }
+
+    /**
+     * List domain forwarding records
+     *
+     * @param array{
+     *    s_id?: int,
+     *    s_serid?: int,
+     *    s_vpsid?: int,
+     *    s_protocol?: string,
+     *    s_src_hostname?: string,
+     *    s_src_port?: int|string,
+     *    s_dest_ip?: string,
+     *    s_dest_port?: int|string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array
+     */
+    public function listDomainForwarding(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=haproxy', [
+            'page' => $page,
+            'reslen' => $perPage,
+            'haproxysearch' => 1,
+            ...$filters
+        ], 'POST');
+    }
+
+    /**
+     * Get High Availability status
+     *
+     * @param int|null $serverGroupId Optional server group ID for specific HA cluster
+     * @return array
+     */
+    public function getHaStatus(?int $serverGroupId = null): array
+    {
+        $params = [];
+        if ($serverGroupId !== null) {
+            $params['get_ha_stats'] = $serverGroupId;
+        }
+        
+        return $this->makeRequest('index.php?act=ha', $params);
     }
 
     // Add other admin API methods here

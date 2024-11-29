@@ -212,23 +212,4 @@ class ServerManager
             );
         }
     }
-
-    /**
-     * Delete a Virtual Private Server
-     *
-     * @param  int  $vpsId  The ID of the VPS to delete
-     * @return array Response from the API
-     *
-     * @throws VirtualizorException
-     */
-    public function deleteVps(int $vpsId): array
-    {
-        $response = $this->client->delete_vs($vpsId);
-
-        if (! isset($response['done']) || $response['done'] !== true) {
-            throw new VirtualizorException('Failed to delete VPS');
-        }
-
-        return $response;
-    }
 }

@@ -1892,6 +1892,33 @@ $success = VirtualizorAdmin::vps()->deleteDomainForwarding([2, 3, 5]);
 
 // Get raw API response
 $response = VirtualizorAdmin::vps()->deleteDomainForwarding(5, raw: true);
+
+// List all domain forwarding records
+$records = VirtualizorAdmin::vps()->listDomainForwarding();
+
+// List with filters
+$records = VirtualizorAdmin::vps()->listDomainForwarding([
+    'record_id' => 7,              // Filter by record ID
+    'server_id' => 1,              // Filter by server ID
+    'vps_id' => 62,               // Filter by VPS ID
+    'protocol' => 'TCP',          // Filter by protocol (TCP, HTTP, HTTPS)
+    'source_hostname' => '202.168.147.144', // Filter by source hostname/IP
+    'source_port' => 1226,        // Filter by source port
+    'dest_ip' => '10.0.0.10',     // Filter by destination IP
+    'dest_port' => 22             // Filter by destination port
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->listDomainForwarding([], 1, 50, raw: true);
+
+// Get High Availability status
+$status = VirtualizorAdmin::vps()->getHaStatus();
+
+// Get HA status for specific server group
+$status = VirtualizorAdmin::vps()->getHaStatus(16);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->getHaStatus(null, raw: true);
 ```
 
 Manage VPS Response:
