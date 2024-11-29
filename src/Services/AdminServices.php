@@ -19,6 +19,8 @@ use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
 use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
 use CODEIQ\Virtualizor\Services\Admin\DiskManager;
 use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
+use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
+use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
 
 /**
  * @method UserService users()
@@ -37,6 +39,8 @@ use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
  * @method ProcessManager processes()
  * @method DiskManager disk()
  * @method BandwidthManager bandwidth()
+ * @method FirewallManager firewall()
+ * @method ServerMonitoringManager monitoring()
  */
 class AdminServices
 {
@@ -58,6 +62,8 @@ class AdminServices
     protected ?ProcessManager $processManager = null;
     protected ?DiskManager $diskManager = null;
     protected ?BandwidthManager $bandwidthManager = null;
+    protected ?FirewallManager $firewallManager = null;
+    protected ?ServerMonitoringManager $serverMonitoringManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -191,5 +197,21 @@ class AdminServices
             $this->bandwidthManager = new BandwidthManager($this->api);
         }
         return $this->bandwidthManager;
+    }
+
+    public function firewall(): FirewallManager
+    {
+        if (! $this->firewallManager) {
+            $this->firewallManager = new FirewallManager($this->api);
+        }
+        return $this->firewallManager;
+    }
+
+    public function monitoring(): ServerMonitoringManager
+    {
+        if (! $this->serverMonitoringManager) {
+            $this->serverMonitoringManager = new ServerMonitoringManager($this->api);
+        }
+        return $this->serverMonitoringManager;
     }
 }

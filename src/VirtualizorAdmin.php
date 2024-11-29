@@ -19,6 +19,8 @@ use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
 use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
 use CODEIQ\Virtualizor\Services\Admin\DiskManager;
 use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
+use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
+use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
 
 class VirtualizorAdmin
 {
@@ -117,5 +119,15 @@ class VirtualizorAdmin
     public static function bandwidth(): BandwidthManager
     {
         return new BandwidthManager(self::getApi());
+    }
+
+    public static function firewall(): FirewallManager
+    {
+        return new FirewallManager(self::getApi());
+    }
+
+    public static function monitoring(): ServerMonitoringManager
+    {
+        return new ServerMonitoringManager(self::getApi());
     }
 }

@@ -3342,3 +3342,175 @@ Bandwidth Usage Response:
     'time_taken' => '0.104'
 ]
 ```
+
+#### Firewall Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get firewall status
+$isRunning = VirtualizorAdmin::firewall()->status();
+
+// Start firewall
+$success = VirtualizorAdmin::firewall()->start();
+
+// Stop firewall
+$success = VirtualizorAdmin::firewall()->stop();
+
+// Restart firewall
+$success = VirtualizorAdmin::firewall()->restart();
+
+// Block ports
+$success = VirtualizorAdmin::firewall()->blockPort(80);              // Single port
+$success = VirtualizorAdmin::firewall()->blockPort([80, 443]);       // Multiple ports
+
+// Allow ports
+$success = VirtualizorAdmin::firewall()->allowPort(80);              // Single port
+$success = VirtualizorAdmin::firewall()->allowPort([80, 443]);       // Multiple ports
+
+// Block IP address
+$success = VirtualizorAdmin::firewall()->blockIp('192.168.1.100');                    // All ports
+$success = VirtualizorAdmin::firewall()->blockIp('192.168.1.100', [80, 443]);         // Specific ports
+$success = VirtualizorAdmin::firewall()->blockIp('192.168.1.100', null, true);        // Temporary rule
+
+// Allow IP address
+$success = VirtualizorAdmin::firewall()->allowIp('192.168.1.100');                    // All ports
+$success = VirtualizorAdmin::firewall()->allowIp('192.168.1.100', [80, 443]);         // Specific ports
+$success = VirtualizorAdmin::firewall()->allowIp('192.168.1.100', null, true);        // Temporary rule
+
+// Search IP rules
+$rules = VirtualizorAdmin::firewall()->searchIp('192.168.1.100');
+
+// View all rules
+$rules = VirtualizorAdmin::firewall()->viewRules();
+
+// Toggle testing mode
+$success = VirtualizorAdmin::firewall()->toggleTestingMode(true);    // Enable
+$success = VirtualizorAdmin::firewall()->toggleTestingMode(false);   // Disable
+
+// Get raw API responses
+$response = VirtualizorAdmin::firewall()->status(raw: true);
+$response = VirtualizorAdmin::firewall()->blockPort(80, raw: true);
+$response = VirtualizorAdmin::firewall()->blockIp('192.168.1.100', raw: true);
+// etc...
+```
+
+Firewall Status Response:
+```php
+[
+    'output' => [
+        'iptables: Firewall is running.'
+    ],
+    'timestamp' => 1471411564,
+    'time_taken' => '0.113'
+]
+```
+
+Firewall Rules Response:
+```php
+[
+    'output' => [
+        'Chain INPUT (policy ACCEPT)',
+        'target     prot opt source               destination',
+        'DROP       tcp  --  192.168.1.100        anywhere            tcp dpt:http',
+        'ACCEPT     tcp  --  192.168.1.101        anywhere            tcp dpt:https',
+        // ...
+    ],
+    'timestamp' => 1471411564,
+    'time_taken' => '0.113'
+]
+```
+
+#### Server Monitoring
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get default server information
+$info = VirtualizorAdmin::monitoring()->get(3);
+
+// Get live statistics
+$stats = VirtualizorAdmin::monitoring()->get(3, 'live_stats');
+
+// Get network statistics
+$network = VirtualizorAdmin::monitoring()->get(3, 'network_stats');
+
+// Get raw API response
+$response = VirtualizorAdmin::monitoring()->get(3, raw: true);
+```
+
+Default Mode Response:
+```php
+[
+    'hardware' => [
+        'disks' => [...],           // Available disks
+        'ram' => [...],             // RAM specifications
+        'cpu' => [...],             // CPU specifications
+        'partitions' => [
+            'space' => [...],       // Partition space usage
+            'inodes' => [...]       // Partition inode usage
+        ]
+    ],
+    'timestamp' => 1645002977,
+    'time_taken' => '1.066'
+]
+```
+
+Live Stats Response:
+```php
+[
+    'performance' => [
+        'cpu' => [
+            'model' => 'Intel(R) Xeon(R) CPU E3-1220 v6 @ 3.00GHz',
+            'usage' => 6.82
+        ],
+        'ram' => [
+            'usage' => 55.06
+        ],
+        'disk' => [
+            'health' => [...],
+            'io' => [
+                'sda' => [
+                    'utilization' => 6.38,
+                    'read_speed' => 0.07,
+                    'write_speed' => 0.11,
+                    'reads' => 1286823,
+                    'writes' => 2184056
+                ]
+            ]
+        ],
+        'processes' => [
+            'top_cpu' => [
+                [
+                    'pid' => 27370,
+                    'ppid' => 1,
+                    'command' => '/usr/libexec/qemu-kvm -name',
+                    'cpu' => 11.2,
+                    'ram' => 16.7
+                ]
+            ],
+            'top_ram' => [...]
+        ],
+        'running_scripts' => [...],
+        'missing_binaries' => ['/sbin/gdisk']
+    ],
+    'timestamp' => 1645002977,
+    'time_taken' => '1.066'
+]
+```
+
+Network Stats Response:
+```php
+[
+    'network' => [
+        'interfaces' => [
+            'eth0' => [
+                'up_speed' => 1000,
+                'down_speed' => 1000
+            ]
+        ]
+    ],
+    'timestamp' => 1645002977,
+    'time_taken' => '1.066'
+]
+```

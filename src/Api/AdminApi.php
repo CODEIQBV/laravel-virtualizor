@@ -1949,4 +1949,172 @@ class AdminApi extends BaseApi
             'show' => $month
         ]);
     }
+
+    /**
+     * Get firewall status
+     *
+     * @return array API response
+     */
+    public function firewallStatus(): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'status' => 1
+        ]);
+    }
+
+    /**
+     * Start firewall service
+     *
+     * @return array API response
+     */
+    public function firewallStart(): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'start' => 1
+        ]);
+    }
+
+    /**
+     * Stop firewall service
+     *
+     * @return array API response
+     */
+    public function firewallStop(): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'stop' => 1
+        ]);
+    }
+
+    /**
+     * Restart firewall service
+     *
+     * @return array API response
+     */
+    public function firewallRestart(): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'restart' => 1
+        ]);
+    }
+
+    /**
+     * Block port(s)
+     *
+     * @param string $ports Comma-separated ports to block
+     * @return array API response
+     */
+    public function firewallBlockPort(string $ports): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'block' => 1,
+            'port' => $ports
+        ]);
+    }
+
+    /**
+     * Allow port(s)
+     *
+     * @param string $ports Comma-separated ports to allow
+     * @return array API response
+     */
+    public function firewallAllowPort(string $ports): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'allow' => 1,
+            'port' => $ports
+        ]);
+    }
+
+    /**
+     * Block IP address
+     *
+     * @param array{
+     *    ip: string,
+     *    ip_port?: string,
+     *    ip_temp?: int
+     * } $params IP parameters
+     * @return array API response
+     */
+    public function firewallBlockIp(array $params): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'ip_block' => 1,
+            ...$params
+        ]);
+    }
+
+    /**
+     * Allow IP address
+     *
+     * @param array{
+     *    ip: string,
+     *    ip_port?: string,
+     *    ip_temp?: int
+     * } $params IP parameters
+     * @return array API response
+     */
+    public function firewallAllowIp(array $params): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'ip_allow' => 1,
+            ...$params
+        ]);
+    }
+
+    /**
+     * Search for IP rules
+     *
+     * @param string $ip IP address to search for
+     * @return array API response
+     */
+    public function firewallSearchIp(string $ip): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'search' => 1,
+            'ip' => $ip
+        ]);
+    }
+
+    /**
+     * View current firewall rules
+     *
+     * @return array API response
+     */
+    public function firewallViewRules(): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'view' => 1
+        ]);
+    }
+
+    /**
+     * Toggle firewall testing mode
+     *
+     * @param bool $enable Enable or disable testing mode
+     * @return array API response
+     */
+    public function firewallToggleTestingMode(bool $enable): array
+    {
+        return $this->makeRequest('index.php?act=firewall', [
+            'firewall_testing' => $enable ? 1 : 0
+        ]);
+    }
+
+    /**
+     * Get server monitoring information
+     *
+     * @param int $serverId Server ID to monitor
+     * @param string|null $mode Monitoring mode (default, live_stats, network_stats)
+     * @return array API response
+     */
+    public function getServerMonitoring(int $serverId, ?string $mode = null): array
+    {
+        $params = ['changeserid' => $serverId];
+        if ($mode !== null) {
+            $params['your_preference'] = $mode;
+        }
+
+        return $this->makeRequest('index.php?act=performance', $params);
+    }
 }
