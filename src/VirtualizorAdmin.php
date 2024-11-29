@@ -21,6 +21,8 @@ use CODEIQ\Virtualizor\Services\Admin\DiskManager;
 use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
 use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
+use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
+use CODEIQ\Virtualizor\Services\Admin\RamManager;
 
 class VirtualizorAdmin
 {
@@ -129,5 +131,15 @@ class VirtualizorAdmin
     public static function monitoring(): ServerMonitoringManager
     {
         return new ServerMonitoringManager(self::getApi());
+    }
+
+    public static function sshKeys(): SshKeyManager
+    {
+        return new SshKeyManager(self::getApi());
+    }
+
+    public static function ram(): RamManager
+    {
+        return new RamManager(self::getApi());
     }
 }

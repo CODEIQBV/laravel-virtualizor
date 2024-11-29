@@ -21,6 +21,8 @@ use CODEIQ\Virtualizor\Services\Admin\DiskManager;
 use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
 use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
+use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
+use CODEIQ\Virtualizor\Services\Admin\RamManager;
 
 /**
  * @method UserService users()
@@ -41,6 +43,8 @@ use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
  * @method BandwidthManager bandwidth()
  * @method FirewallManager firewall()
  * @method ServerMonitoringManager monitoring()
+ * @method SshKeyManager sshKeys()
+ * @method RamManager ram()
  */
 class AdminServices
 {
@@ -64,6 +68,8 @@ class AdminServices
     protected ?BandwidthManager $bandwidthManager = null;
     protected ?FirewallManager $firewallManager = null;
     protected ?ServerMonitoringManager $serverMonitoringManager = null;
+    protected ?SshKeyManager $sshKeyManager = null;
+    protected ?RamManager $ramManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -213,5 +219,21 @@ class AdminServices
             $this->serverMonitoringManager = new ServerMonitoringManager($this->api);
         }
         return $this->serverMonitoringManager;
+    }
+
+    public function sshKeys(): SshKeyManager
+    {
+        if (! $this->sshKeyManager) {
+            $this->sshKeyManager = new SshKeyManager($this->api);
+        }
+        return $this->sshKeyManager;
+    }
+
+    public function ram(): RamManager
+    {
+        if (! $this->ramManager) {
+            $this->ramManager = new RamManager($this->api);
+        }
+        return $this->ramManager;
     }
 }

@@ -2117,4 +2117,27 @@ class AdminApi extends BaseApi
 
         return $this->makeRequest('index.php?act=performance', $params);
     }
+
+    /**
+     * Generate new SSH key pair
+     *
+     * @return array API response
+     */
+    public function generateSshKeys(): array
+    {
+        return $this->makeRequest('index.php?act=addvs&generate_keys=1');
+    }
+
+    /**
+     * Get RAM information
+     *
+     * @param array{
+     *    changeserid?: int
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function getRamInfo(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=manageserver', $params);
+    }
 }

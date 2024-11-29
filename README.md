@@ -3514,3 +3514,93 @@ Network Stats Response:
     'time_taken' => '1.066'
 ]
 ```
+
+#### SSH Key Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// List SSH keys for a user
+$keys = VirtualizorAdmin::sshKeys()->list(3582);
+
+// Get raw API response
+$response = VirtualizorAdmin::sshKeys()->list(3582, raw: true);
+
+// Add SSH keys to a VPS
+$success = VirtualizorAdmin::sshKeys()->addToVps(
+    1234,           // VPS ID
+    [14, 15, 16]    // Array of SSH key IDs to add
+);
+
+// Get raw API response
+$response = VirtualizorAdmin::sshKeys()->addToVps(1234, [14, 15, 16], raw: true);
+```
+
+SSH Key List Response:
+```php
+[
+    'keys' => [
+        [
+            'id' => 14,
+            'name' => 'ssh_key_auto_spjpgk5nsiohvxz9',
+            'value' => 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7IqAlA86ZUABy0TSCc... root@lxc'
+        ]
+    ],
+    'timestamp' => 1471411564,
+    'time_taken' => '0.113'
+]
+```
+
+// Generate new SSH key pair
+$keys = VirtualizorAdmin::sshKeys()->generate();
+
+// Get raw API response
+$response = VirtualizorAdmin::sshKeys()->generate(raw: true);
+```
+
+#### RAM Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get RAM info from master server
+$ramInfo = VirtualizorAdmin::ram()->info();
+
+// Get RAM info from specific server
+$ramInfo = VirtualizorAdmin::ram()->info(1);
+
+// Get raw API response
+$response = VirtualizorAdmin::ram()->info(raw: true);
+```
+
+RAM Info Response:
+```php
+[
+    'physical' => [
+        'total' => [
+            'mb' => 1989
+        ],
+        'used' => [
+            'mb' => 808
+        ],
+        'free' => [
+            'mb' => 1181
+        ],
+        'usage' => [
+            'percent' => 40.62,
+            'percent_free' => 59.38
+        ]
+    ],
+    'swap' => [
+        'total' => [
+            'mb' => 1999
+        ],
+        'used' => [
+            'mb' => 1
+        ],
+        'free' => [
+            'mb' => 1998
+        ]
+    ]
+]
+```

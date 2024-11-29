@@ -21,6 +21,8 @@ use CODEIQ\Virtualizor\Services\Admin\DiskManager;
 use CODEIQ\Virtualizor\Services\Admin\BandwidthManager;
 use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
+use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
+use CODEIQ\Virtualizor\Services\Admin\RamManager;
 
 /**
  * @method static UserService users()
@@ -41,6 +43,8 @@ use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
  * @method static BandwidthManager bandwidth()
  * @method static FirewallManager firewall()
  * @method static ServerMonitoringManager monitoring()
+ * @method static SshKeyManager sshKeys()
+ * @method static RamManager ram()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */
