@@ -1377,5 +1377,389 @@ class AdminApi extends BaseApi
         ], 'POST');
     }
 
-    // Add other admin API methods here
+    /**
+     * List plans
+     *
+     * @param array{
+     *    planname?: string,
+     *    ptype?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listPlans(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=plans', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Add a new plan
+     *
+     * @param array{
+     *    plan_name: string,
+     *    cplan: string,
+     *    disk_space: int,
+     *    guaranteed_ram: int,
+     *    swapram: int,
+     *    burst_ram?: int,
+     *    bandwidth: int,
+     *    network_speed?: int,
+     *    cpu_units: int,
+     *    cpu_cores: int,
+     *    percent_cpu: int,
+     *    priority?: int,
+     *    ips?: int,
+     *    ips6_subnet?: int,
+     *    ips6?: int,
+     *    ips_int?: int,
+     *    ploop?: int,
+     *    virtio?: int,
+     *    acpi?: int,
+     *    apic?: int,
+     *    pae?: int,
+     *    mgs?: array,
+     *    upload_speed?: int,
+     *    band_suspend?: int,
+     *    dns?: array,
+     *    ippoolid?: array,
+     *    nic_type?: string,
+     *    control_panel?: string,
+     *    recipe?: int,
+     *    cpu_mode?: string,
+     *    enable_cpu_topology?: int,
+     *    topology_sockets?: int,
+     *    topology_cores?: int,
+     *    topology_threads?: int,
+     *    vnc_keymap?: string,
+     *    kvm_cache?: string,
+     *    io_mode?: string,
+     *    kvm_vga?: int,
+     *    acceleration?: int,
+     *    total_iops_sec?: int,
+     *    read_bytes_sec?: int,
+     *    write_bytes_sec?: int,
+     *    rdp?: int,
+     *    osreinstall_limit?: int,
+     *    admin_managed?: int,
+     *    disable_nw_config?: int,
+     *    tuntap?: int,
+     *    ppp?: int,
+     *    fuse?: int,
+     *    ipip?: int,
+     *    ipgre?: int,
+     *    nfs?: int,
+     *    quotaugidlimit?: int,
+     *    iolimit?: int,
+     *    iopslimit?: int,
+     *    install_xentools?: int,
+     *    shadow?: int,
+     *    pv_on_hvm?: int,
+     *    vif_type?: string,
+     *    numa?: int,
+     *    os_type?: string,
+     *    rtc?: int,
+     *    ssd_emulation?: int,
+     *    disable_password?: int,
+     *    discard?: int,
+     *    enable_ver_scaling?: int,
+     *    ver_max_ram?: int,
+     *    ver_ram_threshold?: int,
+     *    ver_ram_inc_by?: int,
+     *    ver_max_cpu?: int,
+     *    ver_cpu_threshold?: int,
+     *    ver_cpu_inc_by?: int
+     * } $params Plan parameters
+     * @return array API response
+     */
+    public function addPlan(array $params): array
+    {
+        return $this->makeRequest('index.php?act=addplan', $params, 'POST');
+    }
+
+    /**
+     * Edit plan
+     *
+     * @param int $planId Plan ID to edit
+     * @param array $params Plan parameters
+     * @return array API response
+     */
+    public function editPlan(int $planId, array $params): array
+    {
+        return $this->makeRequest("index.php?act=editplan&plid={$planId}", $params, 'POST');
+    }
+
+    /**
+     * Delete plan(s)
+     *
+     * @param int|string|array $planIds Single plan ID, comma-separated IDs, or array of IDs
+     * @return array API response
+     */
+    public function deletePlans($planIds): array
+    {
+        $delete = is_array($planIds) ? implode(',', $planIds) : $planIds;
+        
+        return $this->makeRequest('index.php?act=plans', [
+            'delete' => $delete
+        ], 'POST');
+    }
+
+    /**
+     * List user plans
+     *
+     * @param array{
+     *    planname?: string,
+     *    ptype?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listUserPlans(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=user_plans', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Add user plan
+     *
+     * @param array{
+     *    plan_name: string,
+     *    priority: int,
+     *    dnsplan_id?: int,
+     *    acl_id?: int,
+     *    num_vs?: int,
+     *    inhouse_billing?: int,
+     *    num_users?: int,
+     *    space?: int,
+     *    ram?: int,
+     *    burst?: int,
+     *    bandwidth?: int,
+     *    cpu?: int,
+     *    cores?: int,
+     *    cpu_percent?: int,
+     *    num_cores?: int,
+     *    num_ipv4?: int,
+     *    num_ipv6_subnet?: int,
+     *    num_ipv6?: int,
+     *    network_speed?: int,
+     *    upload_speed?: int,
+     *    band_suspend?: int,
+     *    service_period?: int,
+     *    allowed_virts?: array,
+     *    sgs?: array,
+     *    mgs?: array,
+     *    space_per_vm?: int,
+     *    total_iops_sec?: int,
+     *    read_bytes_sec?: int,
+     *    write_bytes_sec?: int
+     * } $params Plan parameters
+     * @return array API response
+     */
+    public function addUserPlan(array $params): array
+    {
+        return $this->makeRequest('index.php?act=adduser_plans', $params, 'POST');
+    }
+
+    /**
+     * Edit user plan
+     *
+     * @param int $planId User plan ID to edit
+     * @param array $params Plan parameters
+     * @return array API response
+     */
+    public function editUserPlan(int $planId, array $params): array
+    {
+        return $this->makeRequest("index.php?act=edituser_plans&uplid={$planId}", $params, 'POST');
+    }
+
+    /**
+     * List DNS plans
+     *
+     * @param array{
+     *    planname?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listDnsPlans(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=dnsplans', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Add DNS plan
+     *
+     * @param array{
+     *    plan_name: string,
+     *    dnsserverid: int,
+     *    maxdomains: int,
+     *    maxdomainsrec: int,
+     *    ttl: int
+     * } $params DNS plan parameters
+     * @return array API response
+     */
+    public function addDnsPlan(array $params): array
+    {
+        return $this->makeRequest('index.php?act=adddnsplans', $params, 'POST');
+    }
+
+    /**
+     * Edit DNS plan
+     *
+     * @param int $planId DNS plan ID to edit
+     * @param array{
+     *    plan_name: string,
+     *    dnsserverid: int,
+     *    maxdomains: int,
+     *    maxdomainsrec: int,
+     *    ttl: int
+     * } $params DNS plan parameters
+     * @return array API response
+     */
+    public function editDnsPlan(int $planId, array $params): array
+    {
+        return $this->makeRequest("index.php?act=editdnsplans&dnsplid={$planId}", $params, 'POST');
+    }
+
+    /**
+     * Delete DNS plan(s)
+     *
+     * @param int|string|array $planIds Single plan ID, comma-separated IDs, or array of IDs
+     * @return array API response
+     */
+    public function deleteDnsPlans($planIds): array
+    {
+        $delete = is_array($planIds) ? implode(',', $planIds) : $planIds;
+        
+        return $this->makeRequest('index.php?act=dnsplans', [
+            'delete' => $delete
+        ], 'POST');
+    }
+
+    /**
+     * List backup plans
+     *
+     * @param array{
+     *    planname?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function listBackupPlans(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=backup_plans', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Delete user plan(s)
+     *
+     * @param int|string|array $planIds Single plan ID, comma-separated IDs, or array of IDs
+     * @return array API response
+     */
+    public function deleteUserPlans($planIds): array
+    {
+        $delete = is_array($planIds) ? implode(',', $planIds) : $planIds;
+        
+        return $this->makeRequest('index.php?act=user_plans', [
+            'delete' => $delete
+        ], 'POST');
+    }
+
+    /**
+     * Add backup plan
+     *
+     * @param array{
+     *    disabled?: int,
+     *    plan_name: string,
+     *    type: string,
+     *    id?: int,
+     *    dir: string,
+     *    freq: string,
+     *    hourly_freq: int,
+     *    hrs: int,
+     *    min: int,
+     *    day: int,
+     *    date: int,
+     *    rotation: int,
+     *    backup_limit: int,
+     *    restore_limit: int,
+     *    nice: int,
+     *    ionice_prio: int,
+     *    ionice_class: int,
+     *    compression?: int
+     * } $params Backup plan parameters
+     * @return array API response
+     */
+    public function addBackupPlan(array $params): array
+    {
+        return $this->makeRequest('index.php?act=addbackup_plan', $params, 'POST');
+    }
+
+    /**
+     * Edit backup plan
+     *
+     * @param int $planId Backup plan ID to edit
+     * @param array{
+     *    disabled?: int,
+     *    plan_name: string,
+     *    type: string,
+     *    id?: int,
+     *    dir: string,
+     *    freq: string,
+     *    hourly_freq: int,
+     *    hrs: int,
+     *    min: int,
+     *    day: int,
+     *    date: int,
+     *    rotation: int,
+     *    backup_limit: int,
+     *    restore_limit: int,
+     *    nice: int,
+     *    ionice_prio: int,
+     *    ionice_class: int,
+     *    compression?: int
+     * } $params Backup plan parameters
+     * @return array API response
+     */
+    public function editBackupPlan(int $planId, array $params): array
+    {
+        return $this->makeRequest('index.php?act=editbackup_plan', [
+            'bpid' => $planId,
+            ...$params
+        ], 'POST');
+    }
+
+    /**
+     * Delete backup plan(s)
+     *
+     * @param int|string|array $planIds Single plan ID, comma-separated IDs, or array of IDs
+     * @return array API response
+     */
+    public function deleteBackupPlans($planIds): array
+    {
+        $delete = is_array($planIds) ? implode(',', $planIds) : $planIds;
+        
+        return $this->makeRequest('index.php?act=backup_plans', [
+            'delete' => $delete
+        ], 'POST');
+    }
 }

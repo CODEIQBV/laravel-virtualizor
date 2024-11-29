@@ -11,6 +11,8 @@ use CODEIQ\Virtualizor\Services\Admin\StorageManager;
 use CODEIQ\Virtualizor\Services\Admin\UserService;
 use CODEIQ\Virtualizor\Services\Admin\VpsManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerManager;
+use CODEIQ\Virtualizor\Services\Admin\PlanManager;
+use CODEIQ\Virtualizor\Services\Admin\DnsManager;
 
 /**
  * @method static UserService users()
@@ -21,6 +23,8 @@ use CODEIQ\Virtualizor\Services\Admin\ServerManager;
  * @method static BackupManager backup()
  * @method static IpPoolManager ippool()
  * @method static ServerGroupManager serverGroups()
+ * @method static PlanManager plans()
+ * @method static DnsManager dns()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */

@@ -11,6 +11,8 @@ use CODEIQ\Virtualizor\Services\Admin\StorageManager;
 use CODEIQ\Virtualizor\Services\Admin\UserService;
 use CODEIQ\Virtualizor\Services\Admin\VpsManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerManager;
+use CODEIQ\Virtualizor\Services\Admin\PlanManager;
+use CODEIQ\Virtualizor\Services\Admin\DnsManager;
 
 class VirtualizorAdmin
 {
@@ -69,5 +71,15 @@ class VirtualizorAdmin
     public static function serverGroups(): ServerGroupManager
     {
         return new ServerGroupManager(self::getApi());
+    }
+
+    public static function plans(): PlanManager
+    {
+        return new PlanManager(self::getApi());
+    }
+
+    public static function dns(): DnsManager
+    {
+        return new DnsManager(self::getApi());
     }
 }

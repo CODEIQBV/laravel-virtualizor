@@ -270,4 +270,356 @@ class BackupManager
             );
         }
     }
+
+    /**
+     * List backup plans
+     *
+     * @param array{
+     *    planname?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted backup plan info when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function listPlans(array $filters = [], int $page = 1, int $perPage = 50, bool $raw = false): array
+    {
+        try {
+            $response = $this->api->listBackupPlans($filters, $page, $perPage);
+
+            if ($raw) {
+                return $response;
+            }
+
+            $plans = [];
+            foreach ($response['backup_plans'] ?? [] as $id => $plan) {
+                $plans[] = [
+                    'id' => (int) $plan['bpid'],
+                    'name' => $plan['plan_name'],
+                    'is_enabled' => !(bool) $plan['disabled'],
+                    'backup_server' => [
+                        'id' => (int) $plan['bid'],
+                        'name' => $plan['backup_server']
+                    ],
+                    'schedule' => [
+                        'frequency' => $plan['frequency'],
+                        'time' => $plan['run_time'],
+                        'hourly_frequency' => (int) $plan['hourly_freq'],
+                        'day' => (int) $plan['run_day'],
+                        'date' => (int) $plan['run_date']
+                    ],
+                    'settings' => [
+                        'rotation' => (int) $plan['rotation'],
+                        'backup_limit' => (int) $plan['backup_limit'],
+                        'restore_limit' => (int) $plan['restore_limit'],
+                        'enable_enduser_backup_servers' => (bool) $plan['enable_enduser_backup_servers'],
+                        'nice' => (int) $plan['nice'],
+                        'ionice' => [
+                            'priority' => (int) $plan['ionice_prio'],
+                            'class' => (int) $plan['ionice_class']
+                        ],
+                        'disable_compression' => (bool) $plan['disable_compression'],
+                        'directory' => $plan['dir']
+                    ]
+                ];
+            }
+
+            return [
+                'plans' => $plans,
+                'timestamp' => $response['timenow'] ?? null,
+                'time_taken' => $response['time_taken'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to list backup plans: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Available backup types
+     */
+    private const BACKUP_TYPES = ['LOCAL', 'FTP', 'SSH'];
+
+    /**
+     * Available backup frequencies
+     */
+    private const BACKUP_FREQUENCIES = ['hourly', 'daily', 'weekly', 'monthly'];
+
+    /**
+     * Available IO classes
+     */
+    private const IO_CLASSES = [
+        1 => 'Real time',
+        2 => 'Best Effort',
+        3 => 'Idle'
+    ];
+
+    /**
+     * Create a new backup plan
+     *
+     * @param array{
+     *    disabled?: bool,
+     *    plan_name: string,
+     *    type: string,
+     *    id?: int,
+     *    dir: string,
+     *    freq: string,
+     *    hourly_freq: int,
+     *    hrs: int,
+     *    min: int,
+     *    day: int,
+     *    date: int,
+     *    rotation: int,
+     *    backup_limit: int,
+     *    restore_limit: int,
+     *    nice: int,
+     *    ionice_prio: int,
+     *    ionice_class: int,
+     *    compression?: bool
+     * } $params Backup plan parameters
+     * @param bool $raw Return raw API response
+     * @return array|int Returns plan ID when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function createPlan(array $params, bool $raw = false): array|int
+    {
+        try {
+            // Validate required fields
+            $required = ['plan_name', 'type', 'dir', 'freq', 'hourly_freq', 'hrs', 'min', 
+                        'day', 'date', 'rotation', 'backup_limit', 'restore_limit', 'nice', 
+                        'ionice_prio', 'ionice_class'];
+            foreach ($required as $field) {
+                if (!isset($params[$field])) {
+                    throw new VirtualizorApiException("{$field} is required");
+                }
+            }
+
+            // Validate backup type
+            if (!in_array($params['type'], self::BACKUP_TYPES)) {
+                throw new VirtualizorApiException(
+                    'Invalid backup type. Available types: ' . implode(', ', self::BACKUP_TYPES)
+                );
+            }
+
+            // Validate backup server ID for FTP/SSH
+            if (in_array($params['type'], ['FTP', 'SSH']) && empty($params['id'])) {
+                throw new VirtualizorApiException('Backup server ID is required for FTP/SSH backup type');
+            }
+
+            // Validate frequency
+            if (!in_array($params['freq'], self::BACKUP_FREQUENCIES)) {
+                throw new VirtualizorApiException(
+                    'Invalid frequency. Available frequencies: ' . implode(', ', self::BACKUP_FREQUENCIES)
+                );
+            }
+
+            // Validate numeric ranges
+            $validations = [
+                'hourly_freq' => [0, 23],
+                'hrs' => [0, 23],
+                'min' => [0, 59],
+                'day' => [1, 7],
+                'date' => [1, 31],
+                'rotation' => [0, 10],
+                'backup_limit' => [-1, 10],
+                'restore_limit' => [-1, 10],
+                'nice' => [-20, 19],
+                'ionice_prio' => [0, 7]
+            ];
+
+            foreach ($validations as $field => [$min, $max]) {
+                if ($params[$field] < $min || $params[$field] > $max) {
+                    throw new VirtualizorApiException("{$field} must be between {$min} and {$max}");
+                }
+            }
+
+            // Validate IO class
+            if (!array_key_exists($params['ionice_class'], self::IO_CLASSES)) {
+                throw new VirtualizorApiException(
+                    'Invalid IO class. Available classes: ' . implode(', ', self::IO_CLASSES)
+                );
+            }
+
+            // Convert boolean values to integers
+            if (isset($params['disabled'])) {
+                $params['disabled'] = $params['disabled'] ? 1 : 0;
+            }
+
+            if (isset($params['compression'])) {
+                $params['compression'] = $params['compression'] ? 1 : 0;
+            }
+
+            $response = $this->api->addBackupPlan($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to create backup plan: Operation unsuccessful'
+                );
+            }
+
+            return (int) $response['done'];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to create backup plan: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Edit a backup plan
+     *
+     * @param int $planId Backup plan ID to edit
+     * @param array{
+     *    disabled?: bool,
+     *    plan_name: string,
+     *    type: string,
+     *    id?: int,
+     *    dir: string,
+     *    freq: string,
+     *    hourly_freq: int,
+     *    hrs: int,
+     *    min: int,
+     *    day: int,
+     *    date: int,
+     *    rotation: int,
+     *    backup_limit: int,
+     *    restore_limit: int,
+     *    nice: int,
+     *    ionice_prio: int,
+     *    ionice_class: int,
+     *    compression?: bool
+     * } $params Backup plan parameters
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function editPlan(int $planId, array $params, bool $raw = false): array|bool
+    {
+        try {
+            // Validate required fields
+            $required = ['plan_name', 'type', 'dir', 'freq', 'hourly_freq', 'hrs', 'min', 
+                        'day', 'date', 'rotation', 'backup_limit', 'restore_limit', 'nice', 
+                        'ionice_prio', 'ionice_class'];
+            foreach ($required as $field) {
+                if (!isset($params[$field])) {
+                    throw new VirtualizorApiException("{$field} is required");
+                }
+            }
+
+            // Validate backup type
+            if (!in_array($params['type'], self::BACKUP_TYPES)) {
+                throw new VirtualizorApiException(
+                    'Invalid backup type. Available types: ' . implode(', ', self::BACKUP_TYPES)
+                );
+            }
+
+            // Validate backup server ID for FTP/SSH
+            if (in_array($params['type'], ['FTP', 'SSH']) && empty($params['id'])) {
+                throw new VirtualizorApiException('Backup server ID is required for FTP/SSH backup type');
+            }
+
+            // Validate frequency
+            if (!in_array($params['freq'], self::BACKUP_FREQUENCIES)) {
+                throw new VirtualizorApiException(
+                    'Invalid frequency. Available frequencies: ' . implode(', ', self::BACKUP_FREQUENCIES)
+                );
+            }
+
+            // Validate numeric ranges
+            $validations = [
+                'hourly_freq' => [0, 23],
+                'hrs' => [0, 23],
+                'min' => [0, 59],
+                'day' => [1, 7],
+                'date' => [1, 31],
+                'rotation' => [0, 10],
+                'backup_limit' => [-1, 10],
+                'restore_limit' => [-1, 10],
+                'nice' => [-20, 19],
+                'ionice_prio' => [0, 7]
+            ];
+
+            foreach ($validations as $field => [$min, $max]) {
+                if ($params[$field] < $min || $params[$field] > $max) {
+                    throw new VirtualizorApiException("{$field} must be between {$min} and {$max}");
+                }
+            }
+
+            // Validate IO class
+            if (!array_key_exists($params['ionice_class'], self::IO_CLASSES)) {
+                throw new VirtualizorApiException(
+                    'Invalid IO class. Available classes: ' . implode(', ', self::IO_CLASSES)
+                );
+            }
+
+            // Convert boolean values to integers
+            if (isset($params['disabled'])) {
+                $params['disabled'] = $params['disabled'] ? 1 : 0;
+            }
+
+            if (isset($params['compression'])) {
+                $params['compression'] = $params['compression'] ? 1 : 0;
+            }
+
+            $response = $this->api->editBackupPlan($planId, $params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to edit backup plan: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to edit backup plan {$planId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Delete backup plan(s)
+     *
+     * @param int|array $planIds Single plan ID or array of plan IDs
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function deletePlan(int|array $planIds, bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->deleteBackupPlans($planIds);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to delete backup plan: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            $ids = is_array($planIds) ? implode(', ', $planIds) : $planIds;
+            throw new VirtualizorApiException(
+                "Failed to delete backup plan(s) {$ids}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
 }

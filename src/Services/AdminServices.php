@@ -11,6 +11,8 @@ use CODEIQ\Virtualizor\Services\Admin\StorageManager;
 use CODEIQ\Virtualizor\Services\Admin\UserService;
 use CODEIQ\Virtualizor\Services\Admin\VpsManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerManager;
+use CODEIQ\Virtualizor\Services\Admin\PlanManager;
+use CODEIQ\Virtualizor\Services\Admin\DnsManager;
 
 /**
  * @method UserService users()
@@ -21,6 +23,8 @@ use CODEIQ\Virtualizor\Services\Admin\ServerManager;
  * @method BackupManager backup()
  * @method IpPoolManager ippool()
  * @method ServerGroupManager serverGroups()
+ * @method PlanManager plans()
+ * @method DnsManager dns()
  */
 class AdminServices
 {
@@ -34,6 +38,8 @@ class AdminServices
     protected ?BackupManager $backupManager = null;
     protected ?IpPoolManager $ipPoolManager = null;
     protected ?ServerGroupManager $serverGroupManager = null;
+    protected ?PlanManager $planManager = null;
+    protected ?DnsManager $dnsManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -103,5 +109,21 @@ class AdminServices
             $this->serverGroupManager = new ServerGroupManager($this->api);
         }
         return $this->serverGroupManager;
+    }
+
+    public function plans(): PlanManager
+    {
+        if (! $this->planManager) {
+            $this->planManager = new PlanManager($this->api);
+        }
+        return $this->planManager;
+    }
+
+    public function dns(): DnsManager
+    {
+        if (! $this->dnsManager) {
+            $this->dnsManager = new DnsManager($this->api);
+        }
+        return $this->dnsManager;
     }
 }
