@@ -16,6 +16,7 @@ use CODEIQ\Virtualizor\Services\Admin\DnsManager;
 use CODEIQ\Virtualizor\Services\Admin\LogManager;
 use CODEIQ\Virtualizor\Services\Admin\ServiceManager;
 use CODEIQ\Virtualizor\Services\Admin\VpsStatisticsManager;
+use CODEIQ\Virtualizor\Services\Admin\ProcessManager;
 
 class VirtualizorAdmin
 {
@@ -99,5 +100,10 @@ class VirtualizorAdmin
     public static function vpsStats(): VpsStatisticsManager
     {
         return new VpsStatisticsManager(self::getApi());
+    }
+
+    public static function processes(): ProcessManager
+    {
+        return new ProcessManager(self::getApi());
     }
 }

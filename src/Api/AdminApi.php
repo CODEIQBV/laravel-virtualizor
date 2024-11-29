@@ -1892,4 +1892,35 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=vps_stats', $params);
     }
+
+    /**
+     * List processes
+     *
+     * @param array{
+     *    changeserid?: int
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function listProcesses(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=processes', $params);
+    }
+
+    /**
+     * Kill processes
+     *
+     * @param array $processIds Array of process IDs to kill
+     * @param array{
+     *    changeserid?: int
+     * } $params Additional parameters
+     * @return array API response
+     */
+    public function killProcesses(array $processIds, array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=processes', [
+            'sel_proc' => $processIds,
+            'action' => 'kill',
+            ...$params
+        ], 'POST');
+    }
 }
