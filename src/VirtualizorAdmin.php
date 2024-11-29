@@ -24,6 +24,7 @@ use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
 use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
 use CODEIQ\Virtualizor\Services\Admin\RamManager;
 use CODEIQ\Virtualizor\Services\Admin\CpuManager;
+use CODEIQ\Virtualizor\Services\Admin\TaskManager;
 
 class VirtualizorAdmin
 {
@@ -147,5 +148,10 @@ class VirtualizorAdmin
     public static function cpu(): CpuManager
     {
         return new CpuManager(self::getApi());
+    }
+
+    public static function tasks(): TaskManager
+    {
+        return new TaskManager(self::getApi());
     }
 }

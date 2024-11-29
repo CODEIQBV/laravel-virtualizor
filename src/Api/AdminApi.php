@@ -2153,4 +2153,51 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=manageserver', $params);
     }
+
+    /**
+     * Show tasks
+     *
+     * @return array API response
+     */
+    public function showTasks(): array
+    {
+        return $this->makeRequest('index.php?act=tasks');
+    }
+
+    /**
+     * Show task logs
+     *
+     * @param int $taskId Task ID to show logs for
+     * @return array API response
+     */
+    public function showTaskLogs(int $taskId): array
+    {
+        return $this->makeRequest('index.php?act=tasks', [
+            'show_logs' => $taskId
+        ]);
+    }
+
+    /**
+     * Search tasks
+     *
+     * @param array{
+     *    actid?: int,
+     *    vpsid?: int,
+     *    username?: string,
+     *    action?: string,
+     *    status?: int,
+     *    order?: string
+     * } $filters Search filters
+     * @param int $page Page number
+     * @param int $perPage Records per page
+     * @return array API response
+     */
+    public function searchTasks(array $filters = [], int $page = 1, int $perPage = 50): array
+    {
+        return $this->makeRequest('index.php?act=tasks', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
 }

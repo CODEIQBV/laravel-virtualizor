@@ -3642,3 +3642,109 @@ CPU Info Response:
     ]
 ]
 ```
+
+#### Task Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Show all tasks
+$tasks = VirtualizorAdmin::tasks()->show();
+
+// Get raw API response
+$response = VirtualizorAdmin::tasks()->show(raw: true);
+
+// Show task logs
+$logs = VirtualizorAdmin::tasks()->showLogs(484);
+
+// Get raw API response
+$response = VirtualizorAdmin::tasks()->showLogs(484, raw: true);
+```
+
+Task List Response:
+```php
+[
+    'tasks' => [
+        [
+            'id' => 484,
+            'slave_id' => 0,
+            'user' => [
+                'id' => 0,
+                'email' => 'root',
+                'ip' => '192.168.1.188'
+            ],
+            'vps' => [
+                'id' => 0
+            ],
+            'server' => [
+                'id' => 0,
+                'name' => 'localhost'
+            ],
+            'action' => [
+                'type' => 'getos',
+                'description' => 'Downloading OS',
+                'text' => 'Downloading OS'
+            ],
+            'status' => [
+                'code' => 1,
+                'text' => 'Task Completed',
+                'progress' => 100
+            ],
+            'timing' => [
+                'started' => 'September 4, 2018, 5:12 pm',
+                'updated' => 'September 4, 2018, 5:13 pm',
+                'ended' => 'September 4, 2018, 5:13 pm',
+                'timestamp' => 1536081131
+            ],
+            'process_id' => 0,
+            'is_internal' => false,
+            'data' => [
+                'os' => [
+                    [
+                        'osid' => 100008,
+                        'inprogress' => 0,
+                        'done' => 1,
+                        'failed' => 0,
+                        'err_msg' => 'Download successful'
+                    ]
+                ]
+            ]
+        ]
+    ],
+    'logs' => null,
+    'logs_info' => 'The logs shown are the last operation performed for this task by virtualizor',
+    'timestamp' => 1536144695,
+    'time_taken' => '0.361'
+]
+```
+
+Task Logs Response:
+```php
+[
+    'logs' => [
+        [
+            'category' => 'Download_OS',
+            'message' => 'Starting Task : 484\nOS to Fetch...'
+        ]
+    ],
+    'info' => 'The logs shown are the last operation performed for this task by virtualizor',
+    'timestamp' => 1536149460,
+    'time_taken' => '0.265'
+]
+```
+
+// Search tasks
+$tasks = VirtualizorAdmin::tasks()->search([
+    'actid' => 484,           // Filter by task ID
+    'vpsid' => 123,           // Filter by VPS ID
+    'username' => 'admin',    // Filter by username
+    'action' => 'addvs',      // Filter by action type
+    'status' => 1,            // Filter by status (1=In Progress, 2=Completed, 3=Updated, -1=Errored)
+    'order' => 'DESC'         // Sort order (ASC/DESC)
+]);
+
+// Search with pagination
+$tasks = VirtualizorAdmin::tasks()->search([], 1, 20);
+
+// Get raw API response
+$response = VirtualizorAdmin::tasks()->search($filters, raw: true);
