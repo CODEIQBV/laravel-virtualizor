@@ -1834,4 +1834,46 @@ class AdminApi extends BaseApi
             'delete' => 1
         ], 'POST');
     }
+
+    /**
+     * List services
+     *
+     * @param array{
+     *    changeserid?: int
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function listServices(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=services', $params);
+    }
+
+    /**
+     * Manage services
+     *
+     * @param array{
+     *    sel_serv: array,
+     *    action: string,
+     *    changeserid?: int
+     * } $params Service management parameters
+     * @return array API response
+     */
+    public function manageServices(array $params): array
+    {
+        return $this->makeRequest('index.php?act=services', $params, 'POST');
+    }
+
+    /**
+     * Restart service
+     *
+     * @param array{
+     *    service: string,
+     *    changeserid?: int
+     * } $params Service parameters
+     * @return array API response
+     */
+    public function restartService(array $params): array
+    {
+        return $this->makeRequest('index.php?act=restartservices', $params, 'POST');
+    }
 }

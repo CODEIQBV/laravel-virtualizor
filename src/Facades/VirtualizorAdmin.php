@@ -14,6 +14,7 @@ use CODEIQ\Virtualizor\Services\Admin\ServerManager;
 use CODEIQ\Virtualizor\Services\Admin\PlanManager;
 use CODEIQ\Virtualizor\Services\Admin\DnsManager;
 use CODEIQ\Virtualizor\Services\Admin\LogManager;
+use CODEIQ\Virtualizor\Services\Admin\ServiceManager;
 
 /**
  * @method static UserService users()
@@ -27,6 +28,7 @@ use CODEIQ\Virtualizor\Services\Admin\LogManager;
  * @method static PlanManager plans()
  * @method static DnsManager dns()
  * @method static LogManager logs()
+ * @method static ServiceManager services()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */
