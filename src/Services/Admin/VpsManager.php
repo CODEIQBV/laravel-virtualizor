@@ -1322,4 +1322,881 @@ class VpsManager
             );
         }
     }
+
+    /**
+     * Reset bandwidth for a Virtual Private Server
+     *
+     * @param int $vpsId VPS ID to reset bandwidth
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true/false when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function resetBandwidth(int $vpsId, bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->resetBandwidth($vpsId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            // Check for both done=1 and success message
+            if (empty($response['done']) || $response['done'] !== 1) {
+                throw new VirtualizorApiException(
+                    'Failed to reset bandwidth: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to reset bandwidth for VPS {$vpsId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Get status for Virtual Private Server(s)
+     *
+     * @param array|int $vpsIds Single VPS ID or array of VPS IDs
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted status when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function status(array|int $vpsIds, bool $raw = false): array
+    {
+        try {
+            $response = $this->api->getVpsStatus($vpsIds);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['status'])) {
+                return [];
+            }
+
+            $statuses = [];
+            foreach ($response['status'] as $vpsId => $data) {
+                $statuses[$vpsId] = [
+                    'status' => [
+                        'code' => (int) $data['status'],
+                        'text' => match((int) $data['status']) {
+                            0 => 'off',
+                            1 => 'on',
+                            2 => 'suspended',
+                            default => 'unknown'
+                        }
+                    ],
+                    'resources' => [
+                        'cpu' => [
+                            'usage' => (float) $data['used_cpu']
+                        ],
+                        'ram' => [
+                            'total' => (int) $data['ram'],
+                            'used' => (int) $data['used_ram']
+                        ],
+                        'disk' => [
+                            'total' => (float) $data['disk'],
+                            'used' => (float) $data['used_disk'],
+                            'inodes' => [
+                                'used' => (int) $data['used_inode'],
+                                'total' => (int) $data['inode']
+                            ]
+                        ],
+                        'network' => [
+                            'in' => (float) $data['net_in'],
+                            'out' => (float) $data['net_out']
+                        ],
+                        'io' => [
+                            'read' => (float) $data['io_read'],
+                            'write' => (float) $data['io_write']
+                        ],
+                        'bandwidth' => [
+                            'total' => (float) $data['bandwidth'],
+                            'used' => (float) $data['used_bandwidth']
+                        ]
+                    ],
+                    'type' => $data['virt'],
+                    'locked' => (bool) ($data['lock_status'] ?? false),
+                    'network_suspended' => (bool) ($data['network_status'] ?? false)
+                ];
+            }
+
+            return $statuses;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                'Failed to get VPS status: ' . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Update network rules for a Virtual Private Server
+     *
+     * @param int $vpsId VPS ID to update network rules
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true/false when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function updateNetworkRules(int $vpsId, bool $raw = false): array|bool
+    {
+        try {
+            $response = $this->api->updateVpsNetworkRules($vpsId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['vsop']['output']) || empty($response['vsop']['status'][$vpsId])) {
+                throw new VirtualizorApiException(
+                    'Failed to update network rules: Operation unsuccessful'
+                );
+            }
+
+            return true;
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to update network rules for VPS {$vpsId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from SolusVM
+     *
+     * @param string $action Action to perform (nodes|nodegroups|plans|users|ips|os|vps)
+     * @param array{
+     *    changeserid?: int,
+     *    solusvm_ng?: int,
+     *    solusvm_plans?: int,
+     *    solusvm_users?: int,
+     *    solusvm_ips?: int,
+     *    solusvm_os?: int,
+     *    solusvm_vps?: int,
+     *    kvm_templates?: array<string, string>
+     * } $options Import options
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importSolusvm(string $action, array $options = [], bool $raw = false): array
+    {
+        try {
+            // Validate action
+            $validActions = ['nodes', 'nodegroups', 'plans', 'users', 'ips', 'os', 'vps'];
+            if (!in_array($action, $validActions)) {
+                throw new VirtualizorApiException(
+                    'Invalid action. Must be one of: ' . implode(', ', $validActions)
+                );
+            }
+
+            $params = [
+                'ta' => $action,
+                ...$options
+            ];
+
+            $response = $this->api->importSolusvm($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            // Format response based on action
+            return match($action) {
+                'os' => [
+                    'success' => true,
+                    'templates' => $response['solusvm_templates'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'nodes' => [
+                    'success' => true,
+                    'nodes' => $response['solusvm_nodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'nodegroups' => [
+                    'success' => true,
+                    'groups' => $response['solusvm_nodegroups'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'plans' => [
+                    'success' => true,
+                    'plans' => $response['solusvm_plans'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'users' => [
+                    'success' => true,
+                    'users' => $response['solusvm_users'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'ips' => [
+                    'success' => true,
+                    'ip_blocks' => $response['solusvm_ipblocks'] ?? [],
+                    'ip_block_nodes' => $response['solusvm_ipblocknodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'vps' => [
+                    'success' => true,
+                    'vps' => $response['solusvm_vps'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ]
+            };
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from SolusVM: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from Proxmox
+     *
+     * @param string $action Action to perform (nodes|users|storages|vps)
+     * @param array{
+     *    changeserid?: int,
+     *    proxmox_users?: int,
+     *    proxmox_storages?: int,
+     *    proxmox_vps?: int
+     * } $options Import options
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importProxmox(string $action, array $options = [], bool $raw = false): array
+    {
+        try {
+            // Validate action
+            $validActions = ['nodes', 'users', 'storages', 'vps'];
+            if (!in_array($action, $validActions)) {
+                throw new VirtualizorApiException(
+                    'Invalid action. Must be one of: ' . implode(', ', $validActions)
+                );
+            }
+
+            $params = [
+                'ta' => $action,
+                ...$options
+            ];
+
+            $response = $this->api->importProxmox($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            // Format response based on action
+            return match($action) {
+                'nodes' => [
+                    'success' => true,
+                    'nodes' => $response['proxmox_nodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'users' => [
+                    'success' => true,
+                    'users' => $response['proxmox_users'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'storages' => [
+                    'success' => true,
+                    'storages' => $response['proxmox_storages'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'vps' => [
+                    'success' => true,
+                    'vps' => array_map(function($vps) {
+                        return [
+                            'id' => $vps['vmid'],
+                            'name' => $vps['name'],
+                            'type' => $vps['type'],
+                            'status' => $vps['status'],
+                            'resources' => [
+                                'cpu' => [
+                                    'count' => (int) $vps['cpus'],
+                                    'usage' => (float) $vps['cpu']
+                                ],
+                                'memory' => [
+                                    'max' => (int) $vps['maxmem'],
+                                    'used' => (int) $vps['mem'],
+                                    'swap' => [
+                                        'max' => (int) $vps['maxswap'],
+                                        'used' => (int) $vps['swap']
+                                    ]
+                                ],
+                                'disk' => [
+                                    'max' => (int) $vps['maxdisk'],
+                                    'used' => (int) $vps['disk'],
+                                    'io' => [
+                                        'read' => (int) $vps['diskread'],
+                                        'write' => (int) $vps['diskwrite']
+                                    ]
+                                ],
+                                'network' => [
+                                    'in' => (int) $vps['netin'],
+                                    'out' => (int) $vps['netout']
+                                ]
+                            ],
+                            'uptime' => (int) $vps['uptime'],
+                            'locked' => !empty($vps['lock']),
+                            'template' => $vps['template']
+                        ];
+                    }, $response['proxmox_vps'] ?? []),
+                    'timestamp' => $response['timenow'] ?? null
+                ]
+            };
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from Proxmox: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from Feathur
+     *
+     * @param string $action Action to perform (nodes|users|ips|os|vps)
+     * @param array{
+     *    changeserid?: int,
+     *    feathur_users?: int,
+     *    feathur_ips?: int,
+     *    feathur_os?: int,
+     *    feathur_vps?: int
+     * } $options Import options
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importFeathur(string $action, array $options = [], bool $raw = false): array
+    {
+        try {
+            // Validate action
+            $validActions = ['nodes', 'users', 'ips', 'os', 'vps'];
+            if (!in_array($action, $validActions)) {
+                throw new VirtualizorApiException(
+                    'Invalid action. Must be one of: ' . implode(', ', $validActions)
+                );
+            }
+
+            $params = [
+                'ta' => $action,
+                ...$options
+            ];
+
+            $response = $this->api->importFeathur($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            // Format response based on action
+            return match($action) {
+                'nodes' => [
+                    'success' => true,
+                    'nodes' => $response['feathur_nodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'users' => [
+                    'success' => true,
+                    'users' => $response['feathur_users'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'ips' => [
+                    'success' => true,
+                    'ip_blocks' => $response['feathur_ipblocks'] ?? [],
+                    'ip_block_nodes' => $response['feathur_ipblocknodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'os' => [
+                    'success' => true,
+                    'templates' => $response['feathur_templates'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'vps' => [
+                    'success' => true,
+                    'vps' => array_map(function($vps) {
+                        return [
+                            'id' => $vps['vmid'],
+                            'name' => $vps['name'],
+                            'type' => $vps['type'],
+                            'status' => $vps['status'],
+                            'resources' => [
+                                'cpu' => [
+                                    'count' => (int) $vps['cpus'],
+                                    'usage' => (float) $vps['cpu']
+                                ],
+                                'memory' => [
+                                    'max' => (int) $vps['maxmem'],
+                                    'used' => (int) $vps['mem'],
+                                    'swap' => [
+                                        'max' => (int) $vps['maxswap'],
+                                        'used' => (int) $vps['swap']
+                                    ]
+                                ],
+                                'disk' => [
+                                    'max' => (int) $vps['maxdisk'],
+                                    'used' => (int) $vps['disk'],
+                                    'io' => [
+                                        'read' => (int) $vps['diskread'],
+                                        'write' => (int) $vps['diskwrite']
+                                    ]
+                                ],
+                                'network' => [
+                                    'in' => (int) $vps['netin'],
+                                    'out' => (int) $vps['netout']
+                                ]
+                            ],
+                            'uptime' => (int) $vps['uptime'],
+                            'locked' => !empty($vps['lock']),
+                            'template' => $vps['template']
+                        ];
+                    }, $response['feathur_vps'] ?? []),
+                    'timestamp' => $response['timenow'] ?? null
+                ]
+            };
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from Feathur: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from HyperVM
+     *
+     * @param string $action Action to perform (nodes|plans|users|ips|os|vps)
+     * @param array{
+     *    changeserid?: int,
+     *    hypervm_plans?: int,
+     *    hypervm_users?: int,
+     *    hypervm_ips?: int,
+     *    hypervm_os?: int,
+     *    hypervm_vps?: int
+     * } $options Import options
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importHypervm(string $action, array $options = [], bool $raw = false): array
+    {
+        try {
+            // Validate action
+            $validActions = ['nodes', 'plans', 'users', 'ips', 'os', 'vps'];
+            if (!in_array($action, $validActions)) {
+                throw new VirtualizorApiException(
+                    'Invalid action. Must be one of: ' . implode(', ', $validActions)
+                );
+            }
+
+            $params = [
+                'ta' => $action,
+                ...$options
+            ];
+
+            $response = $this->api->importHypervm($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            // Format response based on action
+            return match($action) {
+                'nodes' => [
+                    'success' => true,
+                    'nodes' => $response['hypervm_nodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'plans' => [
+                    'success' => true,
+                    'plans' => $response['hypervm_plans'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'users' => [
+                    'success' => true,
+                    'users' => $response['hypervm_users'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'ips' => [
+                    'success' => true,
+                    'ip_blocks' => $response['hypervm_ipblocks'] ?? [],
+                    'ip_block_nodes' => $response['hypervm_ipblocknodes'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'os' => [
+                    'success' => true,
+                    'templates' => $response['hypervm_templates'] ?? [],
+                    'timestamp' => $response['timenow'] ?? null
+                ],
+                'vps' => [
+                    'success' => true,
+                    'vps' => array_map(function($vps) {
+                        return [
+                            'id' => $vps['vmid'],
+                            'name' => $vps['name'],
+                            'type' => $vps['type'],
+                            'status' => $vps['status'],
+                            'resources' => [
+                                'cpu' => [
+                                    'count' => (int) $vps['cpus'],
+                                    'usage' => (float) $vps['cpu']
+                                ],
+                                'memory' => [
+                                    'max' => (int) $vps['maxmem'],
+                                    'used' => (int) $vps['mem'],
+                                    'swap' => [
+                                        'max' => (int) $vps['maxswap'],
+                                        'used' => (int) $vps['swap']
+                                    ]
+                                ],
+                                'disk' => [
+                                    'max' => (int) $vps['maxdisk'],
+                                    'used' => (int) $vps['disk'],
+                                    'io' => [
+                                        'read' => (int) $vps['diskread'],
+                                        'write' => (int) $vps['diskwrite']
+                                    ]
+                                ],
+                                'network' => [
+                                    'in' => (int) $vps['netin'],
+                                    'out' => (int) $vps['netout']
+                                ]
+                            ],
+                            'uptime' => (int) $vps['uptime'],
+                            'locked' => !empty($vps['lock']),
+                            'template' => $vps['template']
+                        ];
+                    }, $response['hypervm_vps'] ?? []),
+                    'timestamp' => $response['timenow'] ?? null
+                ]
+            };
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from HyperVM: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from OpenVZ
+     *
+     * @param int $serverId Server ID where OpenVZ is installed
+     * @param array<string, array{bandwidth: int, user_id: int}> $vpsImportData VPS import data keyed by VPS name
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importOpenvz(
+        int $serverId,
+        array $vpsImportData = [],
+        bool $raw = false
+    ): array {
+        try {
+            $params = [
+                'changeserid' => $serverId
+            ];
+
+            // If VPS import data is provided, add import parameters
+            if (!empty($vpsImportData)) {
+                $params['importvps'] = 1;
+
+                // Add bandwidth and user ID parameters for each VPS
+                foreach ($vpsImportData as $vpsName => $data) {
+                    $params["vsbw_{$vpsName}"] = $data['bandwidth'];
+                    $params["vsuser_{$vpsName}"] = $data['user_id'];
+                }
+            }
+            }
+
+            $response = $this->api->importOpenvz($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (!empty($vpsImportData) && empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to import OpenVZ VPS(s): Operation unsuccessful'
+                );
+            }
+
+            return [
+                'success' => !empty($response['done']),
+                'orphaned_vps' => $response['orphan'] ?? [],
+                'users' => array_map(function($user) {
+                    return [
+                        'id' => (int) $user['uid'],
+                        'email' => $user['email'],
+                        'name' => [
+                            'first' => json_decode($user['preferences'] ?? '{}', true)['fname'] ?? null,
+                            'last' => json_decode($user['preferences'] ?? '{}', true)['lname'] ?? null
+                        ],
+                        'status' => [
+                            'active' => (bool) $user['act_status'],
+                            'suspended' => !empty($user['suspended'])
+                        ],
+                        'resources' => [
+                            'space' => (int) $user['space'],
+                            'ram' => (int) $user['ram'],
+                            'burst' => (int) $user['burst'],
+                            'bandwidth' => (int) $user['bandwidth'],
+                            'cpu' => [
+                                'units' => (int) $user['cpu'],
+                                'cores' => (int) $user['cores'],
+                                'percent' => (float) $user['cpu_percent']
+                            ],
+                            'ips' => [
+                                'ipv4' => (int) $user['num_ipv4'],
+                                'ipv6' => (int) $user['num_ipv6'],
+                                'ipv6_subnets' => (int) $user['num_ipv6_subnet'],
+                                'internal' => (int) $user['num_ip_int']
+                            ]
+                        ],
+                        'billing' => [
+                            'balance' => (float) $user['cur_bal'],
+                            'usage' => (float) $user['cur_usage'],
+                            'invoices' => (float) $user['cur_invoices'],
+                            'max_cost' => (float) $user['max_cost']
+                        ]
+                    ];
+                }, $response['users'] ?? []),
+                'timestamp' => $response['timenow'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from OpenVZ: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from XEN Server
+     *
+     * @param int $serverId Server ID where XEN Server is installed
+     * @param array<string, array{bandwidth: int, user_id: int}> $vpsImportData VPS import data keyed by VPS name
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importXenServer(
+        int $serverId,
+        array $vpsImportData = [],
+        bool $raw = false
+    ): array {
+        try {
+            $params = [
+                'changeserid' => $serverId
+            ];
+
+            // If VPS import data is provided, add import parameters
+            if (!empty($vpsImportData)) {
+                $params['importvps'] = 1;
+
+                // Add bandwidth and user ID parameters for each VPS
+                foreach ($vpsImportData as $vpsName => $data) {
+                    $params["vsbw_{$vpsName}"] = $data['bandwidth'];
+                    $params["vsuser_{$vpsName}"] = $data['user_id'];
+                }
+            }
+
+            $response = $this->api->importXenServer($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (!empty($vpsImportData) && empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to import XEN Server VPS(s): Operation unsuccessful'
+                );
+            }
+
+            return [
+                'success' => !empty($response['done']),
+                'orphaned_vps' => $response['orphan'] ?? [],
+                'users' => array_map(function($user) {
+                    return [
+                        'id' => (int) $user['uid'],
+                        'email' => $user['email'],
+                        'name' => [
+                            'first' => json_decode($user['preferences'] ?? '{}', true)['fname'] ?? null,
+                            'last' => json_decode($user['preferences'] ?? '{}', true)['lname'] ?? null
+                        ],
+                        'status' => [
+                            'active' => (bool) $user['act_status'],
+                            'suspended' => !empty($user['suspended'])
+                        ],
+                        'resources' => [
+                            'space' => (int) $user['space'],
+                            'ram' => (int) $user['ram'],
+                            'burst' => (int) $user['burst'],
+                            'bandwidth' => (int) $user['bandwidth'],
+                            'cpu' => [
+                                'units' => (int) $user['cpu'],
+                                'cores' => (int) $user['cores'],
+                                'percent' => (float) $user['cpu_percent']
+                            ],
+                            'ips' => [
+                                'ipv4' => (int) $user['num_ipv4'],
+                                'ipv6' => (int) $user['num_ipv6'],
+                                'ipv6_subnets' => (int) $user['num_ipv6_subnet'],
+                                'internal' => (int) $user['num_ip_int']
+                            ]
+                        ],
+                        'billing' => [
+                            'balance' => (float) $user['cur_bal'],
+                            'usage' => (float) $user['cur_usage'],
+                            'invoices' => (float) $user['cur_invoices'],
+                            'max_cost' => (float) $user['max_cost']
+                        ]
+                    ];
+                }, $response['users'] ?? []),
+                'timestamp' => $response['timenow'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from XEN Server: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * Import from OpenVZ 7
+     *
+     * @param int $serverId Server ID where OpenVZ 7 is installed
+     * @param array<string, array{bandwidth: int, user_id: int}> $vpsImportData VPS import data keyed by VPS name
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted response when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function importOpenvz7(
+        int $serverId,
+        array $vpsImportData = [],
+        bool $raw = false
+    ): array {
+        try {
+            $params = [
+                'changeserid' => $serverId
+            ];
+
+            // If VPS import data is provided, add import parameters
+            if (!empty($vpsImportData)) {
+                $params['importvps'] = 1;
+
+                // Add bandwidth and user ID parameters for each VPS
+                foreach ($vpsImportData as $vpsName => $data) {
+                    $params["vsbw_{$vpsName}"] = $data['bandwidth'];
+                    $params["vsuser_{$vpsName}"] = $data['user_id'];
+                }
+            }
+
+            $response = $this->api->importOpenvz7($params);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (!empty($vpsImportData) && empty($response['done'])) {
+                throw new VirtualizorApiException(
+                    'Failed to import OpenVZ 7 VPS(s): Operation unsuccessful'
+                );
+            }
+
+            return [
+                'success' => !empty($response['done']),
+                'orphaned_vps' => $response['orphan'] ?? [],
+                'users' => array_map(function($user) {
+                    return [
+                        'id' => (int) $user['uid'],
+                        'email' => $user['email'],
+                        'name' => [
+                            'first' => json_decode($user['preferences'] ?? '{}', true)['fname'] ?? null,
+                            'last' => json_decode($user['preferences'] ?? '{}', true)['lname'] ?? null
+                        ],
+                        'status' => [
+                            'active' => (bool) $user['act_status'],
+                            'suspended' => !empty($user['suspended'])
+                        ],
+                        'resources' => [
+                            'space' => (int) $user['space'],
+                            'ram' => (int) $user['ram'],
+                            'burst' => (int) $user['burst'],
+                            'bandwidth' => (int) $user['bandwidth'],
+                            'cpu' => [
+                                'units' => (int) $user['cpu'],
+                                'cores' => (int) $user['cores'],
+                                'percent' => (float) $user['cpu_percent']
+                            ],
+                            'ips' => [
+                                'ipv4' => (int) $user['num_ipv4'],
+                                'ipv6' => (int) $user['num_ipv6'],
+                                'ipv6_subnets' => (int) $user['num_ipv6_subnet'],
+                                'internal' => (int) $user['num_ip_int']
+                            ]
+                        ],
+                        'billing' => [
+                            'balance' => (float) $user['cur_bal'],
+                            'usage' => (float) $user['cur_usage'],
+                            'invoices' => (float) $user['cur_invoices'],
+                            'max_cost' => (float) $user['max_cost']
+                        ]
+                    ];
+                }, $response['users'] ?? []),
+                'timestamp' => $response['timenow'] ?? null
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to import from OpenVZ 7: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
+
+    /**
+     * List SSH keys for a user
+     *
+     * @param int $userId User ID to list SSH keys for
+     * @param bool $raw Return raw API response
+     * @return array Returns formatted SSH keys when raw is false, full response when raw is true
+     * @throws VirtualizorApiException
+     */
+    public function listSshKeys(int $userId, bool $raw = false): array
+    {
+        try {
+            $response = $this->api->listSshKeys($userId);
+
+            if ($raw) {
+                return $response;
+            }
+
+            if (empty($response['ssh_keys'])) {
+                return [
+                    'success' => true,
+                    'keys' => []
+                ];
+            }
+
+            return [
+                'success' => true,
+                'keys' => array_map(function($key) {
+                    return [
+                        'id' => (int) $key['keyid'],
+                        'name' => $key['name'],
+                        'value' => $key['value']
+                    ];
+                }, $response['ssh_keys'])
+            ];
+        } catch (VirtualizorApiException $e) {
+            throw new VirtualizorApiException(
+                "Failed to list SSH keys for user {$userId}: " . $e->getMessage(),
+                $e->getContext()
+            );
+        }
+    }
 }

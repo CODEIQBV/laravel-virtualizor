@@ -1919,6 +1919,145 @@ $status = VirtualizorAdmin::vps()->getHaStatus(16);
 
 // Get raw API response
 $response = VirtualizorAdmin::vps()->getHaStatus(null, raw: true);
+
+// Reset bandwidth for a VPS
+$success = VirtualizorAdmin::vps()->resetBandwidth(123); // returns true/false
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->resetBandwidth(123, raw: true);
+
+// Get status for a single VPS
+$status = VirtualizorAdmin::vps()->status(123);
+
+// Get status for multiple VPSes
+$statuses = VirtualizorAdmin::vps()->status([123, 124, 125]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->status([123, 124], raw: true);
+
+// Update network rules for a VPS
+$success = VirtualizorAdmin::vps()->updateNetworkRules(123); // returns true/false
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->updateNetworkRules(123, raw: true);
+
+// Import OS templates from SolusVM
+$templates = VirtualizorAdmin::vps()->importSolusvm('os', [
+    'changeserid' => 3,  // Optional: Server ID where SolusVM is installed
+    'solusvm_os' => 1,   // Import OS templates
+    'kvm_2' => '334',    // Map SolusVM template ID to Virtualizor template ID
+    'kvm_5' => '334'     // Map another template
+]);
+
+// Import users from SolusVM
+$users = VirtualizorAdmin::vps()->importSolusvm('users', [
+    'solusvm_users' => 1  // Import users
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importSolusvm('os', [], raw: true);
+
+// Import VPS from Proxmox
+$vpsData = VirtualizorAdmin::vps()->importProxmox('vps', [
+    'changeserid' => 3,     // Optional: Server ID where Proxmox is installed
+    'proxmox_vps' => 1      // Import VPS
+]);
+
+// Import users from Proxmox
+$users = VirtualizorAdmin::vps()->importProxmox('users', [
+    'proxmox_users' => 1    // Import users
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importProxmox('vps', [], raw: true);
+
+// Import VPS from Feathur
+$vpsData = VirtualizorAdmin::vps()->importFeathur('vps', [
+    'changeserid' => 3,     // Optional: Server ID where Feathur is installed
+    'feathur_vps' => 1      // Import VPS
+]);
+
+// Import users from Feathur
+$users = VirtualizorAdmin::vps()->importFeathur('users', [
+    'feathur_users' => 1    // Import users
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importFeathur('vps', [], raw: true);
+
+// Import VPS from HyperVM
+$vpsData = VirtualizorAdmin::vps()->importHypervm('vps', [
+    'changeserid' => 3,     // Optional: Server ID where HyperVM is installed
+    'hypervm_vps' => 1      // Import VPS
+]);
+
+// Import users from HyperVM
+$users = VirtualizorAdmin::vps()->importHypervm('users', [
+    'hypervm_users' => 1    // Import users
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importHypervm('vps', [], raw: true);
+
+// List importable OpenVZ VPSes
+$vpsData = VirtualizorAdmin::vps()->importOpenvz(3); // Server ID 3
+
+// Import specific OpenVZ VPSes
+$result = VirtualizorAdmin::vps()->importOpenvz(3, [
+    '121' => [          // VPS name/ID
+        'bandwidth' => 2,
+        'user_id' => 15
+    ],
+    '99013' => [        // Another VPS
+        'bandwidth' => 2,
+        'user_id' => 15
+    ]
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importOpenvz(3, [], raw: true);
+
+// List importable XEN Server VPSes
+$vpsData = VirtualizorAdmin::vps()->importXenServer(3); // Server ID 3
+
+// Import specific XEN Server VPSes
+$result = VirtualizorAdmin::vps()->importXenServer(3, [
+    'v1032' => [          // VPS name/ID
+        'bandwidth' => 2,
+        'user_id' => 15
+    ],
+    'v1025' => [        // Another VPS
+        'bandwidth' => 2,
+        'user_id' => 15
+    ]
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importXenServer(3, [], raw: true);
+
+// List importable OpenVZ 7 VPSes
+$vpsData = VirtualizorAdmin::vps()->importOpenvz7(3); // Server ID 3
+
+// Import specific OpenVZ 7 VPSes
+$result = VirtualizorAdmin::vps()->importOpenvz7(3, [
+    'v1032' => [          // VPS name/ID
+        'bandwidth' => 2,
+        'user_id' => 15
+    ],
+    'v1025' => [        // Another VPS
+        'bandwidth' => 2,
+        'user_id' => 15
+    ]
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->importOpenvz7(3, [], raw: true);
+
+// List SSH keys for a user
+$keys = VirtualizorAdmin::vps()->listSshKeys(123);
+
+// Get raw API response
+$response = VirtualizorAdmin::vps()->listSshKeys(123, raw: true);
 ```
 
 Manage VPS Response:

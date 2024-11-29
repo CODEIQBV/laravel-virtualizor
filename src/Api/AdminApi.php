@@ -990,5 +990,175 @@ class AdminApi extends BaseApi
         return $this->makeRequest('index.php?act=ha', $params);
     }
 
+    /**
+     * Reset bandwidth for a virtual server
+     *
+     * @param int $vpsId VPS ID to reset bandwidth
+     * @return array
+     */
+    public function resetBandwidth(int $vpsId): array
+    {
+        return $this->makeRequest("index.php?act=vs&bwreset={$vpsId}");
+    }
+
+    /**
+     * Get status for virtual server(s)
+     *
+     * @param array|int $vpsIds Single VPS ID or array of VPS IDs
+     * @return array
+     */
+    public function getVpsStatus(array|int $vpsIds): array
+    {
+        $ids = is_array($vpsIds) ? $vpsIds : [$vpsIds];
+        return $this->makeRequest("index.php?act=vs&vs_status=" . implode(',', $ids));
+    }
+
+    /**
+     * Update network rules for a virtual server
+     *
+     * @param int $vpsId VPS ID to update network rules
+     * @return array
+     */
+    public function updateVpsNetworkRules(int $vpsId): array
+    {
+        return $this->makeRequest("index.php?act=vs&action=vs_netrestrict&vpsid={$vpsId}");
+    }
+
+    /**
+     * Import from SolusVM
+     *
+     * @param array{
+     *    ta: string,
+     *    changeserid?: int,
+     *    solusvm_ng?: int,
+     *    solusvm_plans?: int,
+     *    solusvm_users?: int,
+     *    solusvm_ips?: int,
+     *    solusvm_os?: int,
+     *    solusvm_vps?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importSolusvm(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=solusvm', $params);
+    }
+
+    /**
+     * Import from Proxmox
+     *
+     * @param array{
+     *    ta: string,
+     *    changeserid?: int,
+     *    proxmox_users?: int,
+     *    proxmox_storages?: int,
+     *    proxmox_vps?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importProxmox(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=proxmox', $params);
+    }
+
+    /**
+     * Import from Feathur
+     *
+     * @param array{
+     *    ta: string,
+     *    changeserid?: int,
+     *    feathur_users?: int,
+     *    feathur_ips?: int,
+     *    feathur_os?: int,
+     *    feathur_vps?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importFeathur(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=feathur', $params);
+    }
+
+    /**
+     * Import from HyperVM
+     *
+     * @param array{
+     *    ta: string,
+     *    changeserid?: int,
+     *    hypervm_plans?: int,
+     *    hypervm_users?: int,
+     *    hypervm_ips?: int,
+     *    hypervm_os?: int,
+     *    hypervm_vps?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importHypervm(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=hypervm', $params);
+    }
+
+    /**
+     * Import from OpenVZ
+     *
+     * @param array{
+     *    changeserid: int,
+     *    importvps?: int,
+     *    vsbw_*?: int,
+     *    vsuser_*?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importOpenvz(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=openvz', $params);
+    }
+
+    /**
+     * Import from XEN Server
+     *
+     * @param array{
+     *    changeserid: int,
+     *    importvps?: int,
+     *    vsbw_*?: int,
+     *    vsuser_*?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importXenServer(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=xcp', $params);
+    }
+
+    /**
+     * Import from OpenVZ 7
+     *
+     * @param array{
+     *    changeserid: int,
+     *    importvps?: int,
+     *    vsbw_*?: int,
+     *    vsuser_*?: int
+     * } $params Import parameters
+     * @return array
+     */
+    public function importOpenvz7(array $params): array
+    {
+        return $this->makeRequest('index.php?act=import&sa=openvz7', $params);
+    }
+
+    /**
+     * List SSH keys
+     *
+     * @param int $userId User ID to list SSH keys for
+     * @return array
+     */
+    public function listSshKeys(int $userId): array
+    {
+        return $this->makeRequest('index.php?act=users', [
+            'list_ssh_keys' => 1,
+            'uid' => $userId
+        ]);
+    }
+
     // Add other admin API methods here
 }
