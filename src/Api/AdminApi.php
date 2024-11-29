@@ -2200,4 +2200,18 @@ class AdminApi extends BaseApi
             ...$filters
         ]);
     }
+
+    /**
+     * Get node performance statistics
+     *
+     * @param array{
+     *    show?: string,
+     *    serid?: int
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function getNodePerformance(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=server_stats', $params);
+    }
 }

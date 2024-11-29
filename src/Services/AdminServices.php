@@ -25,6 +25,7 @@ use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
 use CODEIQ\Virtualizor\Services\Admin\RamManager;
 use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 use CODEIQ\Virtualizor\Services\Admin\TaskManager;
+use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 
 /**
  * @method UserService users()
@@ -49,6 +50,7 @@ use CODEIQ\Virtualizor\Services\Admin\TaskManager;
  * @method RamManager ram()
  * @method CpuManager cpu()
  * @method TaskManager tasks()
+ * @method NodePerformanceManager nodePerformance()
  */
 class AdminServices
 {
@@ -76,6 +78,7 @@ class AdminServices
     protected ?RamManager $ramManager = null;
     protected ?CpuManager $cpuManager = null;
     protected ?TaskManager $taskManager = null;
+    protected ?NodePerformanceManager $nodePerformanceManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -257,5 +260,13 @@ class AdminServices
             $this->taskManager = new TaskManager($this->api);
         }
         return $this->taskManager;
+    }
+
+    public function nodePerformance(): NodePerformanceManager
+    {
+        if (! $this->nodePerformanceManager) {
+            $this->nodePerformanceManager = new NodePerformanceManager($this->api);
+        }
+        return $this->nodePerformanceManager;
     }
 }

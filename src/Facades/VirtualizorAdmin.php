@@ -25,6 +25,7 @@ use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
 use CODEIQ\Virtualizor\Services\Admin\RamManager;
 use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 use CODEIQ\Virtualizor\Services\Admin\TaskManager;
+use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 
 /**
  * @method static UserService users()
@@ -49,6 +50,7 @@ use CODEIQ\Virtualizor\Services\Admin\TaskManager;
  * @method static RamManager ram()
  * @method static CpuManager cpu()
  * @method static TaskManager tasks()
+ * @method static NodePerformanceManager nodePerformance()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */

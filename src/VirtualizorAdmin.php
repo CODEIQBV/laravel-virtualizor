@@ -25,6 +25,7 @@ use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
 use CODEIQ\Virtualizor\Services\Admin\RamManager;
 use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 use CODEIQ\Virtualizor\Services\Admin\TaskManager;
+use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 
 class VirtualizorAdmin
 {
@@ -153,5 +154,10 @@ class VirtualizorAdmin
     public static function tasks(): TaskManager
     {
         return new TaskManager(self::getApi());
+    }
+
+    public static function nodePerformance(): NodePerformanceManager
+    {
+        return new NodePerformanceManager(self::getApi());
     }
 }

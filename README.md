@@ -3748,3 +3748,57 @@ $tasks = VirtualizorAdmin::tasks()->search([], 1, 20);
 
 // Get raw API response
 $response = VirtualizorAdmin::tasks()->search($filters, raw: true);
+```
+
+#### Node Performance
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get current node performance stats
+$stats = VirtualizorAdmin::nodePerformance()->stats();
+
+// Get stats for specific month
+$stats = VirtualizorAdmin::nodePerformance()->stats([
+    'show' => '202401'    // YYYYMM format
+]);
+
+// Get stats for specific server
+$stats = VirtualizorAdmin::nodePerformance()->stats([
+    'serid' => 3
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::nodePerformance()->stats(raw: true);
+```
+
+Node Performance Response:
+```php
+[
+    'stats' => [
+        [
+            'server_id' => 0,
+            'timestamp' => 1471403402,
+            'resources' => [
+                'disk' => 1.0,
+                'inode' => 98835,
+                'ram' => 253756,
+                'cpu' => [
+                    'usage' => 10796.0,
+                    'actual' => 92.75
+                ],
+                'network' => [
+                    'in' => 128,
+                    'out' => 0
+                ]
+            ]
+        ]
+    ],
+    'month' => [
+        'current_month' => '202401',
+        'prev_month' => '202312',
+        'next_month' => '202402'
+    ],
+    'timestamp' => 1471403773,
+    'time_taken' => '0.130'
+]
