@@ -23,6 +23,7 @@ use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
 use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
 use CODEIQ\Virtualizor\Services\Admin\RamManager;
+use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 
 /**
  * @method UserService users()
@@ -45,6 +46,7 @@ use CODEIQ\Virtualizor\Services\Admin\RamManager;
  * @method ServerMonitoringManager monitoring()
  * @method SshKeyManager sshKeys()
  * @method RamManager ram()
+ * @method CpuManager cpu()
  */
 class AdminServices
 {
@@ -70,6 +72,7 @@ class AdminServices
     protected ?ServerMonitoringManager $serverMonitoringManager = null;
     protected ?SshKeyManager $sshKeyManager = null;
     protected ?RamManager $ramManager = null;
+    protected ?CpuManager $cpuManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -235,5 +238,13 @@ class AdminServices
             $this->ramManager = new RamManager($this->api);
         }
         return $this->ramManager;
+    }
+
+    public function cpu(): CpuManager
+    {
+        if (! $this->cpuManager) {
+            $this->cpuManager = new CpuManager($this->api);
+        }
+        return $this->cpuManager;
     }
 }

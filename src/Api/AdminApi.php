@@ -2140,4 +2140,17 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=manageserver', $params);
     }
+
+    /**
+     * Get CPU information
+     *
+     * @param array{
+     *    changeserid?: int
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function getCpuInfo(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=manageserver', $params);
+    }
 }

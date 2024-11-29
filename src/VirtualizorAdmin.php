@@ -23,6 +23,7 @@ use CODEIQ\Virtualizor\Services\Admin\FirewallManager;
 use CODEIQ\Virtualizor\Services\Admin\ServerMonitoringManager;
 use CODEIQ\Virtualizor\Services\Admin\SshKeyManager;
 use CODEIQ\Virtualizor\Services\Admin\RamManager;
+use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 
 class VirtualizorAdmin
 {
@@ -141,5 +142,10 @@ class VirtualizorAdmin
     public static function ram(): RamManager
     {
         return new RamManager(self::getApi());
+    }
+
+    public static function cpu(): CpuManager
+    {
+        return new CpuManager(self::getApi());
     }
 }

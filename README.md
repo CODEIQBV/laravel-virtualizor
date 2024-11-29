@@ -3604,3 +3604,41 @@ RAM Info Response:
     ]
 ]
 ```
+
+#### CPU Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get CPU info from master server
+$cpuInfo = VirtualizorAdmin::cpu()->info();
+
+// Get CPU info from specific server
+$cpuInfo = VirtualizorAdmin::cpu()->info(1);
+
+// Get raw API response
+$response = VirtualizorAdmin::cpu()->info(raw: true);
+```
+
+CPU Info Response:
+```php
+[
+    'manufacturer' => 'intel',
+    'model' => 'Intel(R) Pentium(R) CPU G620 @ 2.60GHz',
+    'specs' => [
+        'limit' => [
+            'mhz' => 2600.0
+        ],
+        'used' => [
+            'mhz' => 115.64
+        ],
+        'free' => [
+            'mhz' => 2484.36
+        ]
+    ],
+    'usage' => [
+        'percent' => 4.45,
+        'percent_free' => 95.55
+    ]
+]
+```
