@@ -26,6 +26,7 @@ use CODEIQ\Virtualizor\Services\Admin\RamManager;
 use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 use CODEIQ\Virtualizor\Services\Admin\TaskManager;
 use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
+use CODEIQ\Virtualizor\Services\Admin\SslManager;
 
 /**
  * @method static UserService users()
@@ -51,6 +52,7 @@ use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
  * @method static CpuManager cpu()
  * @method static TaskManager tasks()
  * @method static NodePerformanceManager nodePerformance()
+ * @method static SslManager ssl()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */

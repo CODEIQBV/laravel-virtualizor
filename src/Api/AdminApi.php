@@ -2214,4 +2214,83 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=server_stats', $params);
     }
+
+    /**
+     * Get SSL files configuration
+     *
+     * @return array API response
+     */
+    public function getSslFiles(): array
+    {
+        return $this->makeRequest('index.php?act=ssl');
+    }
+
+    /**
+     * Create SSL certificate
+     *
+     * @param array{
+     *    country: string,
+     *    state: string,
+     *    locality: string,
+     *    organisation: string,
+     *    comname: string,
+     *    email: string,
+     *    keysize: int,
+     *    orgunit?: string
+     * } $params SSL parameters
+     * @return array API response
+     */
+    public function createSsl(array $params): array
+    {
+        return $this->makeRequest('index.php?act=createssl', [
+            'create' => 1,
+            ...$params
+        ], 'POST');
+    }
+
+    /**
+     * Install Let's Encrypt certificate
+     *
+     * @param array{
+     *    primary_domain: string,
+     *    contact_email: string,
+     *    key_size: int|string,
+     *    renew_days: int,
+     *    staging?: int,
+     *    enable_force?: int,
+     *    ssl_type?: string
+     * } $params Certificate parameters
+     * @return array API response
+     */
+    public function installLetsEncrypt(array $params): array
+    {
+        return $this->makeRequest('index.php?act=letsencrypt', [
+            'opt' => 'save_cfg',
+            ...$params
+        ], 'POST');
+    }
+
+    /**
+     * Renew Let's Encrypt certificate
+     *
+     * @return array API response
+     */
+    public function renewLetsEncrypt(): array
+    {
+        return $this->makeRequest('index.php?act=letsencrypt', [
+            'opt' => 'renew_crt'
+        ], 'POST');
+    }
+
+    /**
+     * Show Let's Encrypt logs
+     *
+     * @return array API response
+     */
+    public function showLetsEncryptLogs(): array
+    {
+        return $this->makeRequest('index.php?act=letsencrypt', [
+            'opt' => 'show_logs'
+        ], 'POST');
+    }
 }

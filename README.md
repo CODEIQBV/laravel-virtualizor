@@ -3802,3 +3802,102 @@ Node Performance Response:
     'timestamp' => 1471403773,
     'time_taken' => '0.130'
 ]
+```
+
+#### SSL Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get SSL files configuration
+$sslFiles = VirtualizorAdmin::ssl()->files();
+
+// Get raw API response
+$response = VirtualizorAdmin::ssl()->files(raw: true);
+```
+
+SSL Files Response:
+```php
+[
+    'key' => 'Key configuration',
+    'certificate' => 'Certificate configuration',
+    'csr' => 'Certificate Request Configuration',
+    'bundle' => '',
+    'timestamp' => 1471399565,
+    'time_taken' => '0.103'
+]
+```
+
+// Create SSL certificate
+$success = VirtualizorAdmin::ssl()->create([
+    'country' => 'US',           // 2-letter country code
+    'state' => 'California',     // State/province
+    'locality' => 'San Francisco', // City
+    'organisation' => 'Company', // Organization name
+    'comname' => 'example.com',  // Common name (domain)
+    'email' => 'admin@example.com',
+    'keysize' => 2048,          // Key size (1024, 2048, 4096)
+    'orgunit' => 'IT'           // Optional: Organization unit
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::ssl()->create($params, raw: true);
+```
+
+// Install Let's Encrypt certificate
+$success = VirtualizorAdmin::ssl()->installLetsEncrypt([
+    'primary_domain' => 'example.com',     // Domain name
+    'contact_email' => 'admin@example.com',
+    'key_size' => 2048,                    // 2048, 3072, 4096, 8192, ec-256, ec-384
+    'renew_days' => 80,                    // Days before expiry to renew (1-89)
+    'staging' => false,                    // Optional: Use staging environment
+    'enable_force' => true,                // Optional: Force reinstall
+    'ssl_type' => 'letsencrypt'           // Optional: letsencrypt or zerossl
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::ssl()->installLetsEncrypt($params, raw: true);
+```
+
+// Renew Let's Encrypt certificate
+$taskId = VirtualizorAdmin::ssl()->renewLetsEncrypt();
+
+// Get raw API response
+$response = VirtualizorAdmin::ssl()->renewLetsEncrypt(raw: true);
+```
+
+// Show Let's Encrypt logs
+$logs = VirtualizorAdmin::ssl()->showLetsEncryptLogs();
+
+// Get raw API response
+$response = VirtualizorAdmin::ssl()->showLetsEncryptLogs(raw: true);
+```
+
+Let's Encrypt Logs Response:
+```php
+[
+    'config' => [
+        'domain' => 'hostname',
+        'email' => 'specified_email',
+        'key_size' => 2048,
+        'renew_days' => 80,
+        'staging' => true,
+        'force_enabled' => false
+    ],
+    'certificate' => [
+        'domain' => 'hostname',
+        'san' => 'DNS:hostname',
+        'issuer' => 'Let\'s Encrypt Authority X3',
+        'serial' => 'CERTSERIALNO',
+        'validity' => [
+            'from' => 'Sat, 12 Nov 2016 08:36:00 GMT',
+            'to' => 'Fri, 10 Feb 2017 08:36:00 GMT',
+            'next_renewal' => 'Tue, 31 Jan 2017 09:35:52 GMT'
+        ],
+        'is_installed' => true
+    ],
+    'logs' => '3677\n[Wed Nov 16 07:14:26 GMT 2016] Verifying information...',
+    'task_id' => null,
+    'timestamp' => 1480504710,
+    'time_taken' => '0.560'
+]
