@@ -1876,4 +1876,20 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=restartservices', $params, 'POST');
     }
+
+    /**
+     * Get VPS statistics
+     *
+     * @param array{
+     *    vpsid?: int,
+     *    serid?: int,
+     *    svs?: int,
+     *    show?: string
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function getVpsStats(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=vps_stats', $params);
+    }
 }
