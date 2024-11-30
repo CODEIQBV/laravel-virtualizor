@@ -8,8 +8,10 @@ class AdminApi extends BaseApi
      * List all users
      *
      * @param int $page Page number
-     * @param int $perPage Number of records per page
+     * @param int $perPage Number of records per page (previously $reslen)
      * @param array $post Additional filters
+     * @return array
+     * @throws \CODEIQ\Virtualizor\Exceptions\VirtualizorApiException
      */
     public function users(int $page = 1, int $perPage = 50, array $post = []): array
     {
@@ -64,20 +66,18 @@ class AdminApi extends BaseApi
     /**
      * Delete user(s)
      *
-     * @param  int|int[]  $userIds  Single user ID or array of user IDs
-     * @param  bool  $deleteVms  Whether to delete associated VMs
+     * @param int|array $userIds Single user ID or array of user IDs
+     * @param bool $deleteVms Whether to delete associated VMs
+     * @return array
      */
     public function deleteUsers(int|array $userIds, bool $deleteVms = false): array
     {
         $params = [
-            'delete' => is_array($userIds) ? implode(',', $userIds) : (string) $userIds,
+            'delete' => is_array($userIds) ? implode(',', $userIds) : $userIds,
+            'delete_vps' => $deleteVms ? 1 : 0
         ];
-
-        if (! $deleteVms) {
-            $params['dont_delete_vms'] = 1;
-        }
-
-        return $this->makeRequest('index.php?act=users', $params, 'POST');
+        
+        return $this->makeRequest('index.php?act=users', $params);
     }
 
     /**
@@ -1860,7 +1860,7 @@ class AdminApi extends BaseApi
      */
     public function manageServices(array $params): array
     {
-        return $this->makeRequest('index.php?act=services', $params, 'POST');
+        return $this->makeRequest('index.php?act=services', $params);
     }
 
     /**

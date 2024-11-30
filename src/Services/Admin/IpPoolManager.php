@@ -65,11 +65,11 @@ class IpPoolManager
     }
 
     /**
-     * Create a new IP pool
+     * Create IP pool
      *
      * @param array{
      *    iptype: int,
-     *    serid: int|array,
+     *    serid: int|array<int>,
      *    ippool_name: string,
      *    gateway: string,
      *    netmask: string,
@@ -77,20 +77,12 @@ class IpPoolManager
      *    ns2: string,
      *    firstip: string,
      *    lastip: string,
-     *    nat?: bool,
-     *    ips?: array,
-     *    macs?: array,
-     *    routing?: bool,
-     *    internal?: bool,
      *    internal_bridge?: string,
-     *    vlan?: bool,
-     *    vlan_bridge?: string,
-     *    mtu?: int,
-     *    uid?: int
-     * } $poolData IP pool creation data
-     * @param  bool  $raw  Return raw API response
-     *
-     * @throws VirtualizorApiException
+     *    nat?: bool,
+     *    routing?: bool
+     * } $poolData IP pool data
+     * @param bool $raw Return raw API response
+     * @return array|bool Returns true when raw is false, full response when raw is true
      */
     public function create(array $poolData, bool $raw = false): array
     {

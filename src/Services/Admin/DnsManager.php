@@ -79,10 +79,10 @@ class DnsManager
         try {
             // Validate required fields
             $required = ['plan_name', 'dnsserverid', 'maxdomains', 'maxdomainsrec', 'ttl'];
-            foreach ($required as $field) {
-                if (!isset($params[$field])) {
-                    throw new VirtualizorApiException("{$field} is required");
-                }
+            $missing = array_filter($required, fn($field) => !array_key_exists($field, $params));
+            
+            if (!empty($missing)) {
+                throw new VirtualizorApiException(implode(', ', $missing) . ' are required');
             }
 
             // Validate numeric fields

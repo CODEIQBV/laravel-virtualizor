@@ -163,4 +163,15 @@ class ServiceManager
             );
         }
     }
+
+    // Add default case to match expressions
+    private function getServiceStatus(string $status): string 
+    {
+        return match($status) {
+            'running' => 'Running',
+            'stopped' => 'Stopped',
+            'failed' => 'Failed',
+            default => 'Unknown'
+        };
+    }
 } 

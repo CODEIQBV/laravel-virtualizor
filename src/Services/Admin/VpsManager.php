@@ -239,12 +239,18 @@ class VpsManager
      */
     public function create(array $vpsData, bool $raw = false): array
     {
-        // Validate required fields using array_key_exists instead of isset
-        $required = ['virt', 'user_email', 'user_pass', 'hostname', 'rootpass', 'osid', 'ips', 'space', 'ram', 'bandwidth', 'cores'];
-        $missing = array_filter($required, fn($field) => !array_key_exists($field, $vpsData));
+        // Validate required fields
+        $required = ['virt', 'serid', 'hostname', 'rootpass', 'ram', 'space'];
+        $missing = [];
         
-        if (!empty($missing)) {
-            throw new VirtualizorApiException(implode(', ', $missing) . ' are required');
+        foreach ($required as $field) {
+            if (!array_key_exists($field, $vpsData)) {
+                $missing[] = $field;
+            }
+        }
+        
+        if (count($missing) > 0) {
+            throw new VirtualizorApiException('Required fields missing: ' . implode(', ', $missing));
         }
 
         // Validate virtualization type

@@ -86,13 +86,12 @@ class StorageManager
     public function edit(int $storageId, array $params, bool $raw = false): array|bool
     {
         try {
-            // Validate required fields
-            if (empty($params['name'])) {
+            if (!array_key_exists('name', $params)) {
                 throw new VirtualizorApiException('Storage name is required');
             }
 
             // Convert boolean to integer for primary_storage
-            if (isset($params['primary_storage'])) {
+            if (array_key_exists('primary_storage', $params)) {
                 $params['primary_storage'] = $params['primary_storage'] ? 1 : 0;
             }
 
@@ -222,10 +221,16 @@ class StorageManager
         try {
             // Validate required fields
             $required = ['name', 'path', 'type', 'serid', 'format'];
+            $missing = [];
+            
             foreach ($required as $field) {
-                if (!isset($params[$field]) || $params[$field] === '') {
-                    throw new VirtualizorApiException("{$field} is required");
+                if (!array_key_exists($field, $params)) {
+                    $missing[] = $field;
                 }
+            }
+            
+            if (count($missing) > 0) {
+                throw new VirtualizorApiException(implode(', ', $missing) . ' are required');
             }
 
             // Validate storage type

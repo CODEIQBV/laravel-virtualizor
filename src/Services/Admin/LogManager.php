@@ -276,11 +276,9 @@ class LogManager
                 return $response;
             }
 
-            // Verify logs were deleted by checking if iplogs array is empty
-            if (!isset($response['iplogs']) || !is_array($response['iplogs']) || !empty($response['iplogs'])) {
-                throw new VirtualizorApiException(
-                    'Failed to delete IP logs: Operation unsuccessful'
-                );
+            // Check if operation was successful
+            if (!isset($response['done']) || $response['done'] !== 'success') {
+                throw new VirtualizorApiException('Failed to delete IP logs: Operation unsuccessful');
             }
 
             return true;

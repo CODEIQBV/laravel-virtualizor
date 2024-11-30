@@ -742,4 +742,16 @@ class PlanManager
             );
         }
     }
+
+    private function getVirtType(string $type): string 
+    {
+        return match($type) {
+            'openvz', 'vzo' => 'OpenVZ',
+            'kvm', 'vzk' => 'KVM',
+            'xen' => 'Xen PV',
+            'xenhvm' => 'Xen HVM',
+            'lxc' => 'LXC',
+            default => ucfirst($type)
+        };
+    }
 } 
