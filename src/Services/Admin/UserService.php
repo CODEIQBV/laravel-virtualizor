@@ -5,15 +5,7 @@ namespace CODEIQ\Virtualizor\Services\Admin;
 use CODEIQ\Virtualizor\Api\AdminApi;
 use CODEIQ\Virtualizor\Contracts\Services\UserServiceInterface;
 
-/**
- * Admin User Service
- *
- * @method array list(array $filters = [], int $page = 1, int $perPage = 50) List all users
- * @method array get(int $userId) Get a specific user
- * @method array create(array $userData) Create a new user
- * @method array update(int $userId, array $userData) Update a user
- * @method array delete(int $userId) Delete a user
- */
+
 class UserService implements UserServiceInterface
 {
     public function __construct(
