@@ -88,10 +88,16 @@ class IpPoolManager
     {
         // Validate required fields
         $required = ['iptype', 'serid', 'ippool_name', 'gateway', 'netmask', 'ns1', 'ns2', 'firstip', 'lastip'];
+        $missing = [];
+        
         foreach ($required as $field) {
-            if (! isset($poolData[$field])) {
-                throw new VirtualizorApiException("$field is required");
+            if (!array_key_exists($field, $poolData)) {
+                $missing[] = $field;
             }
+        }
+        
+        if (count($missing) > 0) {
+            throw new VirtualizorApiException(implode(', ', $missing) . ' are required');
         }
 
         // Validate IP type

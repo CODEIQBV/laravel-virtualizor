@@ -2802,4 +2802,15 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=users', $params, 'POST');
     }
+
+    /**
+     * Get orphaned disks
+     *
+     * @param array $params Request parameters
+     * @return array
+     */
+    public function orphaneddisks(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=orphaneddisks', $params);
+    }
 }
