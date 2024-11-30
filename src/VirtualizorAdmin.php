@@ -27,6 +27,7 @@ use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 use CODEIQ\Virtualizor\Services\Admin\TaskManager;
 use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 use CODEIQ\Virtualizor\Services\Admin\SslManager;
+use CODEIQ\Virtualizor\Services\Admin\ConfigurationManager;
 
 class VirtualizorAdmin
 {
@@ -165,5 +166,10 @@ class VirtualizorAdmin
     public static function ssl(): SslManager
     {
         return new SslManager(self::getApi());
+    }
+
+    public static function config(): ConfigurationManager
+    {
+        return new ConfigurationManager(self::getApi());
     }
 }

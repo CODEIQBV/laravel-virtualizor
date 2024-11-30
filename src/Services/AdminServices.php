@@ -27,6 +27,7 @@ use CODEIQ\Virtualizor\Services\Admin\CpuManager;
 use CODEIQ\Virtualizor\Services\Admin\TaskManager;
 use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 use CODEIQ\Virtualizor\Services\Admin\SslManager;
+use CODEIQ\Virtualizor\Services\Admin\ConfigurationManager;
 
 /**
  * @method UserService users()
@@ -53,6 +54,7 @@ use CODEIQ\Virtualizor\Services\Admin\SslManager;
  * @method TaskManager tasks()
  * @method NodePerformanceManager nodePerformance()
  * @method SslManager ssl()
+ * @method ConfigurationManager config()
  */
 class AdminServices
 {
@@ -82,6 +84,7 @@ class AdminServices
     protected ?TaskManager $taskManager = null;
     protected ?NodePerformanceManager $nodePerformanceManager = null;
     protected ?SslManager $sslManager = null;
+    protected ?ConfigurationManager $configurationManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -279,5 +282,13 @@ class AdminServices
             $this->sslManager = new SslManager($this->api);
         }
         return $this->sslManager;
+    }
+
+    public function config(): ConfigurationManager
+    {
+        if (! $this->configurationManager) {
+            $this->configurationManager = new ConfigurationManager($this->api);
+        }
+        return $this->configurationManager;
     }
 }

@@ -2437,4 +2437,259 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest("index.php?act=managevps&cbackup=1&vpsid={$vpsId}");
     }
+
+    /**
+     * Get master settings
+     *
+     * @return array API response
+     */
+    public function getMasterSettings(): array
+    {
+        return $this->makeRequest('index.php?act=config');
+    }
+
+    /**
+     * Update master settings
+     *
+     * @param array $settings Settings to update
+     * @return array API response
+     */
+    public function updateMasterSettings(array $settings): array
+    {
+        return $this->makeRequest('index.php?act=config', $settings, 'POST');
+    }
+
+    /**
+     * Get slave settings
+     *
+     * @return array API response
+     */
+    public function getSlaveSettings(): array
+    {
+        return $this->makeRequest('index.php?act=config_slave');
+    }
+
+    /**
+     * Update slave settings
+     *
+     * @param array $settings Settings to update
+     * @return array API response
+     */
+    public function updateSlaveSettings(array $settings): array
+    {
+        return $this->makeRequest('index.php?act=config_slave', $settings, 'POST');
+    }
+
+    /**
+     * Update Webuzo settings
+     *
+     * @param array $settings Webuzo settings
+     * @return array API response
+     */
+    public function updateWebuzoSettings(array $settings): array
+    {
+        return $this->makeRequest('index.php?act=webuzo', $settings, 'POST');
+    }
+
+    /**
+     * Get Webuzo settings
+     *
+     * @return array API response
+     */
+    public function getWebuzoSettings(): array
+    {
+        return $this->makeRequest('index.php?act=webuzo');
+    }
+
+    /**
+     * Get Webuzo scripts
+     *
+     * @return array API response
+     */
+    public function getWebuzoScripts(): array
+    {
+        return $this->makeRequest('index.php?act=webuzo');
+    }
+
+    /**
+     * Update email settings
+     *
+     * @param array $settings Email settings
+     * @return array API response
+     */
+    public function updateEmailSettings(array $settings): array
+    {
+        return $this->makeRequest('index.php?act=emailconfig', $settings, 'POST');
+    }
+
+    /**
+     * Get email settings
+     *
+     * @return array API response
+     */
+    public function getEmailSettings(): array
+    {
+        return $this->makeRequest('index.php?act=emailconfig');
+    }
+
+    /**
+     * Get server information
+     *
+     * @return array API response
+     */
+    public function getServerInfo(): array
+    {
+        return $this->makeRequest('index.php?act=serverinfo');
+    }
+
+    /**
+     * Get license information
+     *
+     * @return array API response
+     */
+    public function getLicenseInfo(): array
+    {
+        return $this->makeRequest('index.php?act=license');
+    }
+
+    /**
+     * Update license key
+     *
+     * @param string $licenseKey New license key
+     * @param bool $refresh Whether to refresh the license after update
+     * @return array API response
+     */
+    public function updateLicense(string $licenseKey, bool $refresh = false): array
+    {
+        return $this->makeRequest('index.php?act=license', [
+            'licform' => 1,
+            'lickey' => $licenseKey,
+            'refreshlicense' => $refresh ? 1 : 0
+        ], 'POST');
+    }
+
+    /**
+     * Change server hostname
+     *
+     * @param string $hostname New hostname
+     * @return array API response
+     */
+    public function changeHostname(string $hostname): array
+    {
+        return $this->makeRequest('index.php?act=hostname', [
+            'changehost' => 1,
+            'newhost' => $hostname
+        ], 'POST');
+    }
+
+    /**
+     * Set maintenance mode
+     *
+     * @param array{
+     *    off: int,
+     *    maintenance: int,
+     *    off_subject?: string,
+     *    off_message?: string
+     * } $params Maintenance mode parameters
+     * @return array API response
+     */
+    public function setMaintenanceMode(array $params): array
+    {
+        return $this->makeRequest('index.php?act=maintenance', $params, 'POST');
+    }
+
+    /**
+     * Get kernel configuration
+     *
+     * @return array API response
+     */
+    public function getKernelConfig(): array
+    {
+        return $this->makeRequest('index.php?act=kernelconf');
+    }
+
+    /**
+     * Get default VPS configuration
+     *
+     * @return array API response
+     */
+    public function getDefaultVpsConfig(): array
+    {
+        return $this->makeRequest('index.php?act=defaultvsconf');
+    }
+
+    /**
+     * Update default VPS configuration
+     *
+     * @param string $config New configuration
+     * @return array API response
+     */
+    public function updateDefaultVpsConfig(string $config): array
+    {
+        return $this->makeRequest('index.php?act=defaultvsconf', [
+            'saveconf' => 1,
+            'confinfo' => $config
+        ], 'POST');
+    }
+
+    /**
+     * Check for updates
+     *
+     * @return array API response
+     */
+    public function checkUpdates(): array
+    {
+        return $this->makeRequest('index.php?act=updates');
+    }
+
+    /**
+     * Apply updates
+     *
+     * @return array API response
+     */
+    public function applyUpdates(): array
+    {
+        return $this->makeRequest('index.php?act=updates', [
+            'update' => 1
+        ], 'POST');
+    }
+
+    /**
+     * Get email templates
+     *
+     * @return array API response
+     */
+    public function getEmailTemplates(): array
+    {
+        return $this->makeRequest('index.php?act=emailtemp');
+    }
+
+    /**
+     * Update email template
+     *
+     * @param string $templateName Template name to update
+     * @param string $subject New email subject
+     * @param string $content New email content
+     * @return array API response
+     */
+    public function updateEmailTemplate(string $templateName, string $subject, string $content): array
+    {
+        return $this->makeRequest('index.php?act=editemailtemp', [
+            'temp' => $templateName,
+            'savetemplate' => 1,
+            'tempsub' => $subject,
+            'tempcontent' => $content
+        ], 'POST');
+    }
+
+    /**
+     * Reset email template to default
+     *
+     * @param string $templateName Template name to reset
+     * @return array API response
+     */
+    public function resetEmailTemplate(string $templateName): array
+    {
+        return $this->makeRequest("index.php?act=editemailtemp&temp={$templateName}&reset={$templateName}");
+    }
 }

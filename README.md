@@ -4204,3 +4204,601 @@ Single VPS Backup Response:
     'time_taken' => '0.269'
 ]
 ```
+
+#### Configuration Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// Get master settings
+$settings = VirtualizorAdmin::config()->getMasterSettings();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getMasterSettings(raw: true);
+```
+
+Master Settings Response:
+```php
+[
+    'globals' => [
+        'path' => '/usr/local/virtualizor',
+        'slave' => 0,
+        'kernel' => 'kvm',
+        'language' => 'english',
+        'timezone' => '0',
+        // ... more global settings
+    ],
+    'info' => [
+        // Server information
+    ],
+    'languages' => [
+        'english' => 'english',
+        'french' => 'french',
+        // ... available languages
+    ],
+    'themes' => [
+        'default' => 'default'
+    ],
+    'timestamp' => 1536163383,
+    'time_taken' => '0.233'
+]
+```
+
+// Update master settings
+$success = VirtualizorAdmin::config()->updateMasterSettings([
+    'sn' => 'API Virt',                // Server/company name
+    'sess_len' => 30000,               // Session timeout (seconds)
+    'soft_email' => 'admin@example.com', // From email address
+    'language' => 'english',           // Interface language
+    'timezone' => 0,                   // Server timezone
+    'theme_folder' => 'default',       // Theme name
+    'admin_logs' => 180,               // Log retention days
+    'login_attempts' => 5,             // Max login attempts
+    'login_ban_time' => 15,            // Ban duration (minutes)
+    // ... many more options available
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->updateMasterSettings($settings, raw: true);
+```
+
+Master Settings Update Response:
+```php
+[
+    'title' => 'Configuration',
+    'done' => 1,
+    'globals' => [
+        // Updated configuration
+    ],
+    'info' => [
+        // Server information
+    ],
+    'timestamp' => 1536234874,
+    'time_taken' => '0.288'
+]
+```
+
+// Get slave settings
+$settings = VirtualizorAdmin::config()->getSlaveSettings();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getSlaveSettings(raw: true);
+```
+
+Slave Settings Response:
+```php
+[
+    'globals' => [
+        'path' => '/usr/local/virtualizor',
+        'slave' => 0,
+        'kernel' => 'kvm',
+        'language' => 'english',
+        'timezone' => '0',
+        // ... more global settings
+    ],
+    'info' => [
+        // Server information
+    ],
+    'languages' => [
+        'english' => 'english',
+        'french' => 'french',
+        // ... available languages
+    ],
+    'themes' => [
+        'default' => 'default'
+    ],
+    'timestamp' => 1536235460,
+    'time_taken' => '0.252'
+]
+```
+
+// Update slave settings
+$success = VirtualizorAdmin::config()->updateSlaveSettings([
+    'serid' => 1,                     // Server ID
+    'cookie_name' => 'SIMCookies3042', // Cookie name
+    'soft_email' => 'admin@example.com', // From email address
+    'timezone' => 0,                   // Server timezone
+    'cron_time' => '18 16 * * 3',     // VPS info cron schedule
+    'emps_cron_time' => '18 16 * * 3', // EMPS update cron schedule
+    'cpu_nm' => true,                 // Show CPU model name
+    'overcommit' => 0,                // RAM overcommit ratio
+    'vnc_ip' => '192.168.1.100',      // VNC IP address
+    'node_bandwidth' => 1000,         // Node bandwidth (GB)
+    'vpslimit' => 100,                // Max VPS count
+    'vcores' => 8,                    // Virtual cores available
+    'haproxy_enable' => true,         // Enable HAProxy
+    // ... many more options available
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->updateSlaveSettings($settings, raw: true);
+```
+
+Slave Settings Update Response:
+```php
+[
+    'title' => 'Configuration',
+    'done' => 1,
+    'globals' => [
+        // Updated configuration
+    ],
+    'info' => [
+        // Server information
+    ],
+    'timestamp' => 1536236494,
+    'time_taken' => '0.240'
+]
+```
+
+// Get Webuzo settings
+$settings = VirtualizorAdmin::config()->getWebuzoSettings();
+
+// Update Webuzo settings
+$success = VirtualizorAdmin::config()->updateWebuzoSettings([
+    'noc_apikey' => 'your-api-key',      // NOC API key
+    'noc_apipass' => 'your-api-pass',    // NOC API password
+    'disable_webuzo' => false,           // Disable all Webuzo scripts
+    'select_all' => false,               // Select all scripts
+    'sel_scripts' => [72, 79, 13]        // Array of script IDs to enable
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getWebuzoSettings(raw: true);
+```
+
+Webuzo Settings Response:
+```php
+[
+    'scripts' => [
+        [
+            'id' => 26,
+            'parent_id' => 0,
+            'name' => 'WordPress',
+            'soft_name' => 'wp',
+            'type' => 'php',
+            'category' => 'blogs'
+        ]
+    ],
+    'enabled_scripts' => [72, 79, 13],
+    'timestamp' => 1537180879,
+    'time_taken' => '0.109'
+]
+```
+
+// Get Webuzo scripts
+$scripts = VirtualizorAdmin::config()->getWebuzoScripts();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getWebuzoScripts(raw: true);
+```
+
+Webuzo Scripts Response:
+```php
+[
+    'scripts' => [
+        [
+            'id' => 26,
+            'parent_id' => 0,
+            'name' => 'WordPress',
+            'soft_name' => 'wp',
+            'type' => 'php',
+            'category' => 'blogs'
+        ],
+        [
+            'id' => 72,
+            'parent_id' => 0,
+            'name' => 'PrestaShop',
+            'soft_name' => 'presta',
+            'type' => 'php',
+            'category' => 'ecommerce'
+        ]
+    ],
+    'by_category' => [
+        'blogs' => [
+            [
+                'id' => 26,
+                'parent_id' => 0,
+                'name' => 'WordPress',
+                'soft_name' => 'wp',
+                'type' => 'php',
+                'category' => 'blogs'
+            ]
+        ],
+        'ecommerce' => [
+            [
+                'id' => 72,
+                'parent_id' => 0,
+                'name' => 'PrestaShop',
+                'soft_name' => 'presta',
+                'type' => 'php',
+                'category' => 'ecommerce'
+            ]
+        ]
+    ],
+    'timestamp' => 1537180879,
+    'time_taken' => '0.109'
+]
+```
+
+// Get email settings
+$settings = VirtualizorAdmin::config()->getEmailSettings();
+
+// Update email settings using PHP mail
+$success = VirtualizorAdmin::config()->updateEmailSettings([
+    'use_php_mail' => true,
+    'disable_emails' => false
+]);
+
+// Update email settings using SMTP
+$success = VirtualizorAdmin::config()->updateEmailSettings([
+    'use_php_mail' => false,
+    'server' => 'smtp.example.com',
+    'port' => 587,
+    'username' => 'user@example.com',
+    'password' => 'password',
+    'smtp_security' => 2,         // 0=None, 1=SSL, 2=STARTTLS
+    'connect_timeout' => 10,      // Seconds
+    'debug' => true,              // Enable debug logging
+    'disable_emails' => false     // Disable all emails
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getEmailSettings(raw: true);
+```
+
+Email Settings Response:
+```php
+[
+    'use_php_mail' => false,
+    'server' => 'smtp.example.com',
+    'port' => 587,
+    'username' => 'user@example.com',
+    'password' => 'password',
+    'smtp_security' => 2,
+    'connect_timeout' => 10,
+    'debug' => true,
+    'emails_disabled' => false,
+    'timestamp' => 1536246723,
+    'time_taken' => '0.238'
+]
+```
+
+// Get server information
+$info = VirtualizorAdmin::config()->getServerInfo();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getServerInfo(raw: true);
+```
+
+Server Info Response:
+```php
+[
+    'path' => '/usr/local/virtualizor',
+    'api' => [
+        'key' => 'your_api_key',
+        'pass' => 'your_api_pass'
+    ],
+    'kernel' => 'kvm',
+    'vps_count' => 1,
+    'version' => [
+        'number' => '2.9.7',
+        'patch' => 0
+    ],
+    'timestamp' => 1536246723,
+    'time_taken' => '0.238'
+]
+```
+
+// Get license information
+$license = VirtualizorAdmin::config()->getLicenseInfo();
+
+// Update license key
+$success = VirtualizorAdmin::config()->updateLicense(
+    'VIRTD-12345-67890-12345-67890',  // License key
+    true                              // Optional: refresh after update
+);
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getLicenseInfo(raw: true);
+```
+
+License Info Response:
+```php
+[
+    'license' => [
+        'key' => 'VIRTD-81008-78272-55853-14018',
+        'type' => [
+            'id' => -1,
+            'name' => 'Trial'
+        ],
+        'status' => [
+            'active' => true,
+            'text' => 'Active'
+        ],
+        'vps_limit' => 0,
+        'expiry' => [
+            'date' => '20181231',
+            'text' => '31/12/2018 GMT'
+        ]
+    ],
+    'timestamp' => 1540373645,
+    'time_taken' => '1.230'
+]
+```
+
+// Change server hostname
+$success = VirtualizorAdmin::config()->changeHostname('server.example.com');
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->changeHostname('server.example.com', raw: true);
+```
+
+Change Hostname Response:
+```php
+[
+    'title' => 'Hostname',
+    'done' => 1,
+    'timestamp' => 1536247931,
+    'time_taken' => '0.246'
+]
+```
+
+Note: The hostname change will only take effect after the server is rebooted.
+
+// Enable maintenance mode with custom message
+$success = VirtualizorAdmin::config()->enableMaintenanceMode([
+    'subject' => 'System Maintenance',
+    'message' => 'The system is currently undergoing maintenance.'
+]);
+
+// Enable maintenance mode with default message
+$success = VirtualizorAdmin::config()->enableMaintenanceMode();
+
+// Disable maintenance mode
+$success = VirtualizorAdmin::config()->disableMaintenanceMode();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->enableMaintenanceMode($options, raw: true);
+```
+
+Maintenance Mode Response:
+```php
+[
+    'title' => 'Maintenance',
+    'done' => 1,
+    'timestamp' => 1471392834,
+    'time_taken' => '0.156'
+]
+```
+
+Note: When maintenance mode is enabled, end users will not be able to access their panels.
+
+// Get kernel configuration
+$config = VirtualizorAdmin::config()->getKernelConfig();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getKernelConfig(raw: true);
+```
+
+Kernel Configuration Response:
+```php
+[
+    'config' => [
+        'global' => [
+            'VIRTUOZZO' => 'yes',
+            'LOCKDIR' => '/vz/lock',
+            'DUMPDIR' => '/vz/dump',
+            'VE0CPUUNITS' => '1000'
+        ],
+        'logging_parameters' => [
+            'LOGGING' => 'yes',
+            'LOGFILE' => '/var/log/vzctl.log',
+            'LOG_LEVEL' => '0',
+            'VERBOSE' => '0'
+        ],
+        'disk_quota_parameters' => [
+            'DISK_QUOTA' => 'yes',
+            'VZFASTBOOT' => 'no'
+        ],
+        // ... more sections
+    ],
+    'raw_config' => '## Global parameters\nVIRTUOZZO=yes\n...',
+    'timestamp' => 1473905520,
+    'time_taken' => '0.126'
+]
+```
+
+The configuration is parsed into a structured array for easier access, while preserving the raw configuration string.
+
+// Get default VPS configuration
+$config = VirtualizorAdmin::config()->getDefaultVpsConfig();
+
+// Update default VPS configuration
+$success = VirtualizorAdmin::config()->updateDefaultVpsConfig('
+    ONBOOT="yes"
+    KMEMSIZE="unlimited"
+    LOCKEDPAGES="unlimited"
+    PRIVVMPAGES="unlimited"
+    SHMPAGES="unlimited"
+    NUMPROC="unlimited"
+    PHYSPAGES="0:262144"
+    SWAPPAGES="0:262144"
+    # ... more configuration
+');
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getDefaultVpsConfig(raw: true);
+```
+
+Default VPS Configuration Response:
+```php
+[
+    'config' => [
+        'ONBOOT' => 'yes',
+        'KMEMSIZE' => 'unlimited',
+        'LOCKEDPAGES' => 'unlimited',
+        'PRIVVMPAGES' => 'unlimited',
+        'SHMPAGES' => 'unlimited',
+        'NUMPROC' => 'unlimited',
+        'PHYSPAGES' => '0:262144',
+        'SWAPPAGES' => '0:262144',
+        // ... more settings
+    ],
+    'raw_config' => '###################################################\n...',
+    'timestamp' => 1473915377,
+    'time_taken' => '0.097'
+]
+```
+
+Note: This configuration is only applicable for OpenVZ VPS containers.
+
+// Check for updates
+$updates = VirtualizorAdmin::config()->checkUpdates();
+
+// Apply available updates
+$success = VirtualizorAdmin::config()->applyUpdates();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->checkUpdates(raw: true);
+```
+
+Updates Response:
+```php
+[
+    'updated' => true,
+    'version' => [
+        'number' => '2.9.8',
+        'patch' => 1
+    ],
+    'update' => [
+        'message' => 'The Virtualizor Team has released Virtualizor 2.9.8.0...',
+        'mode' => 1,
+        'link' => 'https://s3.softaculous.com/a/virtualizor/updates.php?give=2.9.8.1',
+        'redirect' => '/index.php'
+    ],
+    'timestamp' => 1540377807,
+    'time_taken' => '1.249'
+]
+```
+
+The update process runs in the background. You can monitor its progress through the task system.
+
+// Get email templates
+$templates = VirtualizorAdmin::config()->getEmailTemplates();
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->getEmailTemplates(raw: true);
+```
+
+Email Templates Response:
+```php
+[
+    'templates' => [
+        'general' => [
+            'addvs' => [
+                'name' => 'addvs',
+                'subject' => 'mail_addvs_sub',
+                'body' => 'mail_addvs'
+            ],
+            'rebuildvs' => [
+                'name' => 'rebuildvs',
+                'subject' => 'mail_rebuildvs_sub',
+                'body' => 'mail_rebuildvs'
+            ]
+        ],
+        'admin' => [
+            'admin_addvs' => [
+                'name' => 'admin_addvs',
+                'subject' => 'admin_mail_addvs_sub',
+                'body' => 'admin_mail_addvs'
+            ]
+        ],
+        'billing' => [
+            'billing_warn_users' => [
+                'name' => 'billing_warn_users',
+                'subject' => 'billing_warn_users_sub',
+                'body' => 'billing_warn_users_body'
+            ]
+        ],
+        'suspension' => [
+            'suspend_vps' => [
+                'name' => 'suspend_vps',
+                'subject' => 'suspend_vps_sub',
+                'body' => 'suspend_vps_body'
+            ]
+        ]
+    ],
+    'timestamp' => 1536251967,
+    'time_taken' => '0.208'
+]
+```
+
+Templates are organized by category for easier management: general, admin, billing, suspension, and webuzo.
+
+// Update email template
+$success = VirtualizorAdmin::config()->updateEmailTemplate(
+    'addvs',                        // Template name
+    'New VPS Created',              // Email subject
+    'Your VPS has been created...'  // Email content
+);
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->updateEmailTemplate(
+    'addvs',
+    'New VPS Created',
+    'Your VPS has been created...',
+    raw: true
+);
+```
+
+Email Template Update Response:
+```php
+[
+    'title' => 'Edit Email Template',
+    'done' => 1,
+    'emailtemp' => null,
+    'timestamp' => 1480485898,
+    'time_taken' => '0.104'
+]
+```
+
+Available template names can be retrieved using the getEmailTemplates() method. The templates are used for various system notifications like VPS creation, deletion, suspension, etc.
+
+// Reset email template to default
+$success = VirtualizorAdmin::config()->resetEmailTemplate('addvs');
+
+// Get raw API response
+$response = VirtualizorAdmin::config()->resetEmailTemplate('addvs', raw: true);
+```
+
+Email Template Reset Response:
+```php
+[
+    'title' => 'Edit Email Template',
+    'emailtemp' => null,
+    'timestamp' => 1536253321,
+    'time_taken' => '0.239'
+]
+```
+
+This will restore the specified email template to its original default content. Available template names can be retrieved using the getEmailTemplates() method.
