@@ -2782,4 +2782,24 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=recipes', $params, 'POST');
     }
+
+    /**
+     * List logs
+     */
+    public function listLogs(array $filters, int $page, int $perPage): array
+    {
+        return $this->makeRequest('index.php?act=logs', [
+            'page' => $page,
+            'reslen' => $perPage,
+            ...$filters
+        ]);
+    }
+
+    /**
+     * Delete users
+     */
+    public function delete_users(array $params): array 
+    {
+        return $this->makeRequest('index.php?act=users', $params, 'POST');
+    }
 }

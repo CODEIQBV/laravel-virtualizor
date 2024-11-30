@@ -56,4 +56,14 @@ class EnduserApi extends BaseApi
             ...$params,
         ]);
     }
+
+    public function userpassword(array $params): array
+    {
+        return $this->makeRequest('index.php?act=userpassword', $params, 'POST');
+    }
+
+    public function usersettings(array $params): array
+    {
+        return $this->makeRequest('index.php?act=usersettings', $params, 'POST');
+    }
 }
