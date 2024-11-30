@@ -2692,4 +2692,94 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest("index.php?act=editemailtemp&temp={$templateName}&reset={$templateName}");
     }
+
+    /**
+     * List recipes
+     *
+     * @param array{
+     *    page?: int,
+     *    reslen?: int,
+     *    rid?: int,
+     *    rname?: string
+     * } $params Query parameters
+     * @return array API response
+     */
+    public function listRecipes(array $params = []): array
+    {
+        return $this->makeRequest('index.php?act=recipes', $params);
+    }
+
+    /**
+     * Create recipe
+     *
+     * @param array{
+     *    recipe_name: string,
+     *    recipe_script: string,
+     *    desc?: string,
+     *    recipe_logo?: string,
+     *    shell?: string
+     * } $params Recipe parameters
+     * @return array API response
+     */
+    public function createRecipe(array $params): array
+    {
+        return $this->makeRequest('index.php?act=addrecipe', $params, 'POST');
+    }
+
+    /**
+     * Update recipe
+     *
+     * @param array{
+     *    rid: int,
+     *    name?: string,
+     *    code?: string,
+     *    desc?: string,
+     *    logo?: string,
+     *    shell?: string
+     * } $params Recipe parameters
+     * @return array API response
+     */
+    public function updateRecipe(array $params): array
+    {
+        return $this->makeRequest("index.php?act=editrecipe&rid={$params['rid']}", $params, 'POST');
+    }
+
+    /**
+     * Delete recipe(s)
+     *
+     * @param array{
+     *    delete: string|int
+     * } $params Recipe parameters
+     * @return array API response
+     */
+    public function deleteRecipes(array $params): array
+    {
+        return $this->makeRequest('index.php?act=recipes', $params, 'POST');
+    }
+
+    /**
+     * Activate recipe(s)
+     *
+     * @param array{
+     *    activate: string|int
+     * } $params Recipe parameters
+     * @return array API response
+     */
+    public function activateRecipes(array $params): array
+    {
+        return $this->makeRequest('index.php?act=recipes', $params, 'POST');
+    }
+
+    /**
+     * Deactivate recipe(s)
+     *
+     * @param array{
+     *    deactivate: string|int
+     * } $params Recipe parameters
+     * @return array API response
+     */
+    public function deactivateRecipes(array $params): array
+    {
+        return $this->makeRequest('index.php?act=recipes', $params, 'POST');
+    }
 }

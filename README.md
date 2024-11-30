@@ -4802,3 +4802,150 @@ Email Template Reset Response:
 ```
 
 This will restore the specified email template to its original default content. Available template names can be retrieved using the getEmailTemplates() method.
+
+#### Recipe Management
+
+```php
+use CODEIQ\Virtualizor\VirtualizorAdmin;
+
+// List all recipes
+$recipes = VirtualizorAdmin::recipes()->list();
+
+// List with filters
+$recipes = VirtualizorAdmin::recipes()->list([
+    'recipe_id' => 1,              // Filter by recipe ID
+    'name' => 'test_recipe*',      // Filter by name (supports wildcards)
+    'page' => 1,                   // Page number
+    'per_page' => 10               // Results per page
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::recipes()->list($filters, raw: true);
+```
+
+Recipe List Response:
+```php
+[
+    'recipes' => [
+        [
+            'id' => 1,
+            'name' => 'hello',
+            'code' => '#!/bin/sh\ndate >> /root/date.txt;\n',
+            'description' => '',
+            'logo' => '',
+            'is_active' => true
+        ],
+        [
+            'id' => 2,
+            'name' => 'api recipe',
+            'code' => '#!/bin/sh\ndate > /tmp/recipe.txt',
+            'description' => 'This is the description for test recipe',
+            'logo' => '',
+            'is_active' => true
+        ]
+    ],
+    'timestamp' => 1536159274,
+    'time_taken' => '0.206'
+]
+```
+
+Recipes are predefined bash scripts that can be executed during VPS creation or on running VPSes (requires restart).
+
+// Update recipe
+$success = VirtualizorAdmin::recipes()->update(23, [
+    'name' => 'test_recipe1',
+    'script' => 'This is your test recipe',
+    'description' => 'This is the description for test recipe',
+    'logo' => 'https://example.com/logo.png',  // Optional
+    'shell' => 'bash'                          // Optional: sh, bash, ksh, zsh
+]);
+
+// Get raw API response
+$response = VirtualizorAdmin::recipes()->update(23, $params, raw: true);
+```
+
+Recipe Update Response:
+```php
+[
+    'title' => 'Edit Recipe',
+    'done' => 1,
+    'done_msg' => 'Recipe has been updated',
+    'timestamp' => 1536159013,
+    'time_taken' => '0.204'
+]
+```
+
+Only provide the parameters you want to update. Omitted parameters will keep their current values.
+
+// Delete single recipe
+$success = VirtualizorAdmin::recipes()->delete(19);
+
+// Delete multiple recipes
+$success = VirtualizorAdmin::recipes()->delete([17, 18, 19]);
+
+// Get raw API response
+$response = VirtualizorAdmin::recipes()->delete($recipeIds, raw: true);
+```
+
+Recipe Delete Response:
+```php
+[
+    'title' => 'Recipes',
+    'done' => ['19'],
+    'recipe' => [
+        // Remaining recipes
+    ],
+    'timestamp' => 1477375332,
+    'time_taken' => '0.076'
+]
+```
+
+// Activate single recipe
+$success = VirtualizorAdmin::recipes()->activate(7);
+
+// Activate multiple recipes
+$success = VirtualizorAdmin::recipes()->activate([7, 8, 9]);
+
+// Get raw API response
+$response = VirtualizorAdmin::recipes()->activate($recipeIds, raw: true);
+```
+
+Recipe Activate Response:
+```php
+[
+    'title' => 'Recipes',
+    'done' => [7, 8, 9],
+    'recipe' => [
+        // Updated recipes
+    ],
+    'timestamp' => 1536162440,
+    'time_taken' => '0.223'
+]
+```
+
+Only activated recipes are visible to end users and can be executed during VPS creation or on running VPSes.
+
+// Deactivate single recipe
+$success = VirtualizorAdmin::recipes()->deactivate(7);
+
+// Deactivate multiple recipes
+$success = VirtualizorAdmin::recipes()->deactivate([7, 8, 9]);
+
+// Get raw API response
+$response = VirtualizorAdmin::recipes()->deactivate($recipeIds, raw: true);
+```
+
+Recipe Deactivate Response:
+```php
+[
+    'title' => 'Recipes',
+    'done' => [7, 8, 9],
+    'recipe' => [
+        // Updated recipes
+    ],
+    'timestamp' => 1536162598,
+    'time_taken' => '0.256'
+]
+```
+
+Deactivated recipes will not be visible to end users and cannot be executed during VPS creation or on running VPSes.

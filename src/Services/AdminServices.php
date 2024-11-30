@@ -28,6 +28,7 @@ use CODEIQ\Virtualizor\Services\Admin\TaskManager;
 use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 use CODEIQ\Virtualizor\Services\Admin\SslManager;
 use CODEIQ\Virtualizor\Services\Admin\ConfigurationManager;
+use CODEIQ\Virtualizor\Services\Admin\RecipeManager;
 
 /**
  * @method UserService users()
@@ -55,6 +56,7 @@ use CODEIQ\Virtualizor\Services\Admin\ConfigurationManager;
  * @method NodePerformanceManager nodePerformance()
  * @method SslManager ssl()
  * @method ConfigurationManager config()
+ * @method RecipeManager recipes()
  */
 class AdminServices
 {
@@ -85,6 +87,7 @@ class AdminServices
     protected ?NodePerformanceManager $nodePerformanceManager = null;
     protected ?SslManager $sslManager = null;
     protected ?ConfigurationManager $configurationManager = null;
+    protected ?RecipeManager $recipeManager = null;
 
     public function __construct(AdminApi $api)
     {
@@ -290,5 +293,13 @@ class AdminServices
             $this->configurationManager = new ConfigurationManager($this->api);
         }
         return $this->configurationManager;
+    }
+
+    public function recipes(): RecipeManager
+    {
+        if (! $this->recipeManager) {
+            $this->recipeManager = new RecipeManager($this->api);
+        }
+        return $this->recipeManager;
     }
 }
