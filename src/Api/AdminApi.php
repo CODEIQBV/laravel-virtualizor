@@ -2802,4 +2802,9 @@ class AdminApi extends BaseApi
     {
         return $this->makeRequest('index.php?act=users', $params, 'POST');
     }
+
+    public function listOSTemplates(): array
+    {
+        return $this->makeRequest('index.php?act=ostemplates', []);
+    }
 }
