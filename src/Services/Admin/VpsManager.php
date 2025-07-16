@@ -526,7 +526,7 @@ class VpsManager
             }
 
             // Check if operation was successful
-            if (! isset($response['done']) || $response['done'] !== true) {
+            if (! isset($response['done']) || empty($response['done'])) {
                 throw new VirtualizorApiException('Failed to manage VPS: Operation unsuccessful');
             }
 
