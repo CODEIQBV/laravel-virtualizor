@@ -90,7 +90,7 @@ class AdminServices
     protected ?SslManager $sslManager = null;
     protected ?ConfigurationManager $configurationManager = null;
     protected ?RecipeManager $recipeManager = null;
-    protected ?osManager $osManager = null;
+    protected ?OSManager $osManager = null;
 
     public function __construct(AdminApi $api)
     {
