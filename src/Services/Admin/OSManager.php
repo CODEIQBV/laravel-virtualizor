@@ -5,14 +5,14 @@ namespace CODEIQ\Virtualizor\Services\Admin;
 use CODEIQ\Virtualizor\Api\AdminApi;
 use CODEIQ\Virtualizor\Exceptions\VirtualizorApiException;
 
-class OSTemplates
+class OSManager
 {
 
     public function __construct(
         private readonly AdminApi $api
     ) {}
 
-    public function oslists(): array
+    public function list(): array
     {
         try {
             $response = $this->api->listOSTemplates();
