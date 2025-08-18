@@ -29,6 +29,7 @@ use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 use CODEIQ\Virtualizor\Services\Admin\SslManager;
 use CODEIQ\Virtualizor\Services\Admin\ConfigurationManager;
 use CODEIQ\Virtualizor\Services\Admin\RecipeManager;
+use CODEIQ\Virtualizor\Services\Admin\OSManager;
 
 /**
  * @method static UserService users()
@@ -57,6 +58,7 @@ use CODEIQ\Virtualizor\Services\Admin\RecipeManager;
  * @method static SslManager ssl()
  * @method static ConfigurationManager config()
  * @method static RecipeManager recipes()
+ * @method static OSManager os()
  * 
  * @see \CODEIQ\Virtualizor\Services\AdminServices
  */

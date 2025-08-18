@@ -29,6 +29,7 @@ use CODEIQ\Virtualizor\Services\Admin\NodePerformanceManager;
 use CODEIQ\Virtualizor\Services\Admin\SslManager;
 use CODEIQ\Virtualizor\Services\Admin\ConfigurationManager;
 use CODEIQ\Virtualizor\Services\Admin\RecipeManager;
+use CODEIQ\Virtualizor\Services\Admin\OSManager;
 
 class VirtualizorAdmin
 {
@@ -177,5 +178,10 @@ class VirtualizorAdmin
     public static function recipes(): RecipeManager
     {
         return new RecipeManager(self::getApi());
+    }
+
+    public static function os(): OSManager
+    {
+        return new OSManager(self::getApi());
     }
 }
